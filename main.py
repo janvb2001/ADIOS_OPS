@@ -4,6 +4,19 @@ import random as rnd
 import time
 from math import sqrt
 
+# Things to include:
+# - Drones should have a delay at the ground station and each litter piece (Which can be deduced from req.)
+# - Drones should not get too close to each other
+# - Simulate the reasonable worst-case scenario
+#     - van position is not ideal
+#     - Garbage position is not ideal
+# - Include different litter types in the program
+# - Include different drone types in the program
+# - Include obstacles
+# - Include the possibility for the van to drive
+# - Include reconnaisance drone
+# - Wind
+
 
 #inputs
 litter_n = 100
