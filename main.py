@@ -28,13 +28,14 @@ v_van = 2       # m/s
 vanMovement = 1         # 0: Stationary van, 1: van squares around
 plot_driveplan = True
 
-runspeed = 100          # Factor wrt real-time
+runspeed = 10          # Factor wrt real-time
 
-dt = 1  # s
+dt = 0.1  # s
 
 # sizes of area in m
-x_size = 1000
-y_size = 1000
+totalArea = 10000       # m^2
+x_size = sqrt(totalArea)
+y_size = sqrt(totalArea)
 
 # starting position of ground station
 
@@ -114,7 +115,9 @@ def on_route(curx, cury, goalx, goaly, v, dt):
     # recalculate the time needed to reach destination and store
     t_b, dn = new_d_t(curx, cury, goalx, goaly, v)
 
-    return newx, newy, t_b, dn
+    dd = dist(curx, newx, cury, newy)
+
+    return newx, newy, t_b, dd
 def van_reached(lit_a):
 
     # Check whether there is still litter left to be taken
@@ -205,7 +208,7 @@ litterplot, = plt.plot(littercoor[0], littercoor[1], 'o', color='black', markers
 groundplot, = plt.plot(ground_stat_pos[0], ground_stat_pos[1], color='g', marker='s', markersize=10)
 droneplot, = plt.plot(drone_data[0], drone_data[1], 'o', color='b', markersize = 6)
 
-if plot_driveplan:
+if plot_driveplan and vanMovement == 1:
     checkpoint, = plt.plot(van_positions[0], van_positions[1])
 
 startTime = time.time()
@@ -277,14 +280,17 @@ while run:
 
 
             if ground_stat_pos[0] == van_positions[0][cur_goal] and ground_stat_pos[1] == van_positions[1][cur_goal]:
-                cur_goal += 1
+                if cur_goal < len(van_positions[0]) - 1:
+                    cur_goal += 1
+                else:
+                    cur_goal = 0
 
         # check whether simulation is done
         if len(active_drones) == 0:
-            time.sleep(3)
+            time.sleep(2)
             run = False
-            print("Total drone distance is: " + str(totaldronedist))
-            print("End time is: " + str(t))
+            print("Total drone distance is: " + str(totaldronedist) + " m")
+            print("End time is: " + str(t) + " s")
             break
 
         t += dt
