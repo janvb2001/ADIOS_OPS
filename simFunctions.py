@@ -1,5 +1,5 @@
 from generalFunc import *
-def van_reached(lit_a, drone_data, littercoor, d, v_drone):
+def van_reached(lit_a, drone_data, litter, d, v_drone):
 
     # Check whether there is still litter left to be taken
     if len(lit_a[0]) > 0:
@@ -19,8 +19,8 @@ def van_reached(lit_a, drone_data, littercoor, d, v_drone):
         lit_a[1].pop(liti)
 
         # Calculate the time needed to get to the destination and store
-        t_busy, dnext = new_d_t(d.x, d.y, littercoor[0][nextitem],
-                                littercoor[1][nextitem], v_drone)
+        t_busy, dnext = new_d_t(d.x, d.y, litter[0][nextitem],
+                                litter[1][nextitem], v_drone)
 
     else:
         # if there is no litter left, the drone is done
@@ -29,11 +29,11 @@ def van_reached(lit_a, drone_data, littercoor, d, v_drone):
 
     return nextitem, t_busy, lit_a
 
-def recalc_lit_dist(lit_coor, lit_a, gs_x, gs_y):
+def recalc_lit_dist(lit, lit_a, gs_x, gs_y):
     distances = []
 
     for li in range(len(lit_a[0])):
-        di = dist(gs_x, lit_coor[0][lit_a[0][li]], gs_y, lit_coor[1][lit_a[0][li]])
+        di = dist(gs_x, lit[0][lit_a[0][li]], gs_y, lit[1][lit_a[0][li]])
         distances.append(di)
 
     return distances
@@ -52,17 +52,3 @@ def plot_update(newxdrone, newydrone, newxvan, newyvan, newxlit, newylit, litter
     figure.canvas.draw()
     figure.canvas.flush_events()
 
-class Drone:
-    def __init__(self, x_pos, y_pos, t_busy, state):
-        self.x = x_pos
-        self.y = y_pos
-        self.t_busy = t_busy
-        self.state = state
-class DrivingDrone:
-    None
-
-class Van:
-    None
-
-class Litter:
-    None

@@ -9,23 +9,9 @@ def simulate(simInput):
     van_positions = simInput["van_positions"]
     littercoor = simInput["littercoor"]
     lit_avail = simInput["lit_avail"]
-
-    # Setting up the drone data arrays
-    # x_coor, y_coor, end time busy, item traveling to
-    drones = []
-    # drone_data = [[], [], [], []]
-    active_drones = []
-    for d in range(simInput["drone_n"]):
-        drones.append(Drone(ground_stat_pos[0], ground_stat_pos[1], 0, -1))
-
-        # drone_data[0].append(ground_stat_pos[0])
-        # drone_data[1].append(ground_stat_pos[1])
-        # drone_data[2].append(0)
-        # drone_data[3].append(-1)
-
-        active_drones.append(d)
-
-    print(drones)
+    drones = simInput["drones"]
+    active_drones = simInput["active_drones"]
+    van = simInput["van"]
 
     # to run GUI event loop, necessary for animation
     plt.ion()
@@ -42,8 +28,10 @@ def simulate(simInput):
     groundplot, = plt.plot(ground_stat_pos[0], ground_stat_pos[1], color='g', marker='s', markersize=10)
     droneplot, = plt.plot(d_x, d_y, 'o', color='b', markersize=6)
 
-    if simInput["plot_driveplan"] and simInput["vanMovement"] == 1:
+    if simInput["plot_driveplan"] and simInput["vanMovement"] >= 1:
         checkpoint, = plt.plot(van_positions[0], van_positions[1])
+    if simInput["vanMovement"] >= 1:
+        vanplt, = plt.plot(simInput["van"].x, simInput["van"].y, 'o', color = "red", markersize = 10)
 
     startTime = time.time()
 
@@ -58,37 +46,57 @@ def simulate(simInput):
                 d = drones[ad]
                 litteri = d.state
 
+                d.charge -= simInput["dt"]
+
                 # The drone is done with getting to the van
                 if d.t_busy <= t and d.state == -1:
+                    if d.wait_t_left <= 0 and d.charge > simInput["charge_start"]:
+                        # Selection of next item
+                        nextitem, t_busy, lit_avail = van_reached(lit_avail, drones, littercoor, d, simInput["v_drone"])
+                        d.state = nextitem
 
-                    # Selection of next item
-                    nextitem, t_busy, lit_avail = van_reached(lit_avail, drones, littercoor, d, simInput["v_drone"])
-                    d.state = nextitem
+                        # If there is no more litter, remove the drone from active drones
+                        if nextitem == -2:
+                            dronei = active_drones.index(ad)
+                            active_drones.pop(dronei)
 
-                    # If there is no more litter, remove the drone from active drones
-                    if nextitem == -2:
-                        dronei = active_drones.index(ad)
-                        active_drones.pop(dronei)
-
-                        d.x = None
-                        d.y = None
+                            d.x = None
+                            d.y = None
+                        else:
+                            d.t_busy = t + t_busy
+                            d.wait_t_left = d.t_wait_lit
+                    elif d.wait_t_left <= 0 and d.charge <= simInput["charge_start"]:
+                        d.state = -3
+                        t_b, dd = new_d_t(d.x, d.y, van.x, van.y, d.v)
+                        d.t_busy = t + t_b
                     else:
-                        d.t_busy = t + t_busy
+                        d.wait_t_left -= simInput["dt"]
+                        d.x = ground_stat_pos[0]
+                        d.y = ground_stat_pos[1]
 
                 # The drone has reached the litter piece
                 elif d.t_busy <= t and d.state >= 0:
-                    # The litter is picked up so has no coordinate anymore
-                    littercoor[0][d.state] = None
-                    littercoor[1][d.state] = None
+                    if d.wait_t_left <= 0:
+                        # The litter is picked up so has no coordinate anymore
+                        littercoor[0][d.state] = None
+                        littercoor[1][d.state] = None
 
-                    # The drone is no longer on its way to litter
-                    d.state = -1
+                        # The drone is no longer on its way to litter
+                        d.state = -1
 
-                    # Determine the time needed to reach destination and store
-                    t_busy, dnext = new_d_t(d.x, d.y, ground_stat_pos[0], ground_stat_pos[1],
-                                            simInput["v_drone"])
-                    d.t_busy = t + t_busy
-
+                        # Determine the time needed to reach destination and store
+                        t_busy, dnext = new_d_t(d.x, d.y, ground_stat_pos[0], ground_stat_pos[1],
+                                                simInput["v_drone"])
+                        d.t_busy = t + t_busy
+                        d.wait_t_left = d.t_wait_ground
+                    else:
+                        d.wait_t_left -= simInput["dt"]
+                elif d.t_busy <= t and d.state == -3:
+                    if d.charge > d.charge0:
+                        d.state = -1
+                        t_busy, dnext = new_d_t(d.x, d.y, ground_stat_pos[0], ground_stat_pos[1], d.v)
+                    else:
+                        d.charge += d.charge0 * simInput["dt"] / d.rechargetime
 
                 # If the drone is on its way
                 elif d.t_busy > t:
@@ -102,6 +110,8 @@ def simulate(simInput):
                         # The drone is on its way to a litter piece
                         nx, ny, t_busy, dis = on_route(d.x, d.y, littercoor[0][litteri],
                                                        littercoor[1][litteri], simInput["v_drone"], simInput["dt"])
+                    elif litteri == -3:
+                        nx, ny, t_busy, dis = on_route(d.x, d.y, van.x, van.y, d.v, simInput['dt'])
 
                     # Store data
                     totaldronedist += dis
@@ -109,10 +119,10 @@ def simulate(simInput):
                     d.x = nx
                     d.y = ny
 
-            if simInput["vanMovement"] == 1:
+            if simInput["vanMovement"] >= 1:
                 ground_stat_pos[0], ground_stat_pos[1], t_busy, dis = on_route(ground_stat_pos[0], ground_stat_pos[1],
                                                                                van_positions[0][cur_goal],
-                                                                               van_positions[1][cur_goal], simInput["v_van"], simInput["dt"])
+                                                                               van_positions[1][cur_goal], simInput["v_ddrone"], simInput["dt"])
                 lit_avail[1] = recalc_lit_dist(littercoor, lit_avail, ground_stat_pos[0], ground_stat_pos[1])
 
                 if ground_stat_pos[0] == van_positions[0][cur_goal] and ground_stat_pos[1] == van_positions[1][

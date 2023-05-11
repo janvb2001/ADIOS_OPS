@@ -1,5 +1,14 @@
+from math import sqrt
 
-def vanPosData(simInput):
+class DrivingDrone:
+    def __init__(self, x_pos, y_pos, ddrone_v, waypoints):
+        self.x = x_pos
+        self.y = y_pos
+        self.v = ddrone_v
+        self.waypoints = waypoints
+
+
+def ddronePosData(simInput):
     # output: array [[xs], [ys]]. when first checkpoint is reached, the van will move to the next
     vanMoveChoice = simInput["vanMovement"]
     x_s = simInput["x_size"]
@@ -46,7 +55,50 @@ def vanPosData(simInput):
             if lx < 0 or ly < 0:
                 cont = False
             dir += 1
+    elif vanMoveChoice == 2:
+        l_side = sqrt(x_s * y_s / 2)
+
+        g_s = [int(x_s/2 - 0.5 * l_side), int(y_s/2 - 0.5 * l_side)]
+        van_positions = [[x_s/2 - 0.5 * l_side, x_s/2 - 0.5 * l_side, x_s/2 + 0.5 * l_side, x_s/2 + 0.5 * l_side],
+                         [y_s/2 - 0.5 * l_side, y_s/2 + 0.5 * l_side, y_s/2 + 0.5 * l_side, y_s/2 - 0.5 * l_side]]
+
+
+    elif vanMoveChoice == 3:
+        n_x = 1/10 * x_s
+        y_c = 1/20 * y_s
+
+        x = 0
+        y = y_c
+
+        g_s = [0, y_c]
+        van_positions = [[0],
+                         [y_c]]
+        drawing = True
+        up = True
+        while drawing:
+            if x <= x_s and up:
+                y += y_s - 2 * y_c
+                up = False
+            elif x <= x_s and not up:
+                y -= y_s - 2 * y_c
+                up = True
+            elif x > x_s:
+                drawing = False
+
+            if drawing:
+                van_positions[0].append(x)
+                van_positions[1].append(y)
+
+                x += n_x
+                if x <= x_s:
+
+                    van_positions[0].append(x)
+                    van_positions[1].append(y)
+
+
+    ddrone = DrivingDrone(g_s[0], g_s[1], simInput["v_ddrone"], van_positions)
+
     simInput["ground_stat_pos"] = g_s
     simInput["van_positions"] = van_positions
 
-    return simInput
+    return simInput, ddrone
