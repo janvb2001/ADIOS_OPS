@@ -1,5 +1,6 @@
 
 def vanPosData(simInput):
+    # output: array [[xs], [ys]]. when first checkpoint is reached, the van will move to the next
     vanMoveChoice = simInput["vanMovement"]
     x_s = simInput["x_size"]
     y_s = simInput["y_size"]

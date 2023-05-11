@@ -19,7 +19,7 @@ def van_reached(lit_a, drone_data, littercoor, d, v_drone):
         lit_a[1].pop(liti)
 
         # Calculate the time needed to get to the destination and store
-        t_busy, dnext = new_d_t(drone_data[0][d], drone_data[1][d], littercoor[0][nextitem],
+        t_busy, dnext = new_d_t(d.x, d.y, littercoor[0][nextitem],
                                 littercoor[1][nextitem], v_drone)
 
     else:
@@ -51,3 +51,18 @@ def plot_update(newxdrone, newydrone, newxvan, newyvan, newxlit, newylit, litter
 
     figure.canvas.draw()
     figure.canvas.flush_events()
+
+class Drone:
+    def __init__(self, x_pos, y_pos, t_busy, state):
+        self.x = x_pos
+        self.y = y_pos
+        self.t_busy = t_busy
+        self.state = state
+class DrivingDrone:
+    None
+
+class Van:
+    None
+
+class Litter:
+    None

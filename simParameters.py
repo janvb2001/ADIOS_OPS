@@ -5,10 +5,10 @@ simInput = dict(
     drone_n = 10,
     v_drone = 8,    # m/s
     v_van = 2,       # m/s
-    vanMovement = 0,         # 0: Stationary van, 1: van squares around
+    vanMovement = 1,         # 0: Stationary van, 1: van squares around
     plot_driveplan = True,
 
-    runspeed = 100,          # Factor wrt real-time
+    runspeed = 10,          # Factor wrt real-time
 
     dt = 0.1,  # s
 

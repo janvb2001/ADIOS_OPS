@@ -2,7 +2,7 @@ from generalFunc import *
 import random as rnd
 
 def litterDist(simInput):
-
+    #output:
     # Setting up the litter data arrays
     lit_avail = [[], []]
     littercoor = [[], []]
