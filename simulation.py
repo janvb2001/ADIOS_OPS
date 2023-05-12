@@ -5,33 +5,40 @@ import time
 
 def simulate(simInput):
     # drone_n, litter_n, ground_stat_pos, van_positions, x_size, y_size, plot_driveplan, vanMovement, runspeed, v_drone, dt, v_van
-    ground_stat_pos = simInput["ground_stat_pos"]
     van_positions = simInput["van_positions"]
     littercoor = simInput["littercoor"]
     lit_avail = simInput["lit_avail"]
     drones = simInput["drones"]
     active_drones = simInput["active_drones"]
     van = simInput["van"]
+    ddrones = simInput["ddrones"]
 
-    # to run GUI event loop, necessary for animation
-    plt.ion()
+    if simInput["plotProcess"]:
 
-    d_x = []
-    d_y = []
-    for d in drones:
-        d_x.append(d.x)
-        d_y.append(d.y)
+        # to run GUI event loop, necessary for animation
+        plt.ion()
 
-    # setting up de figure with how each object is displayed
-    figure, ax = plt.subplots(figsize=(10, 8))
-    litterplot, = plt.plot(littercoor[0], littercoor[1], 'o', color='black', markersize=4)
-    groundplot, = plt.plot(ground_stat_pos[0], ground_stat_pos[1], color='g', marker='s', markersize=10)
-    droneplot, = plt.plot(d_x, d_y, 'o', color='b', markersize=6)
+        d_x = []
+        d_y = []
+        for d in drones:
+            d_x.append(d.x)
+            d_y.append(d.y)
+        dd_x = []
+        dd_y = []
+        for dd in range(len(ddrones)):
+            dd_x.append(ddrones[dd].x)
+            dd_y.append(ddrones[dd].y)
 
-    if simInput["plot_driveplan"] and simInput["vanMovement"] >= 1:
-        checkpoint, = plt.plot(van_positions[0], van_positions[1])
-    if simInput["vanMovement"] >= 1:
-        vanplt, = plt.plot(simInput["van"].x, simInput["van"].y, 'o', color = "red", markersize = 10)
+        # setting up de figure with how each object is displayed
+        figure, ax = plt.subplots(figsize=(10, 8))
+        litterplot, = plt.plot(littercoor[0], littercoor[1], 'o', color='black', markersize=4)
+        groundplot, = plt.plot(dd_x, dd_y, color='g', marker='s', markersize=10)
+        droneplot, = plt.plot(d_x, d_y, 'o', color='b', markersize=6)
+
+        if simInput["plot_driveplan"] and simInput["vanMovement"] >= 1:
+            checkpoint, = plt.plot(van_positions[0], van_positions[1])
+        if simInput["vanMovement"] >= 1:
+            vanplt, = plt.plot(simInput["van"].x, simInput["van"].y, 'o', color = "red", markersize = 10)
 
     startTime = time.time()
 
@@ -69,10 +76,12 @@ def simulate(simInput):
                         d.state = -3
                         t_b, dd = new_d_t(d.x, d.y, van.x, van.y, d.v)
                         d.t_busy = t + t_b
+                        ddrones[d.ddronei].v -= ddrones[d.ddronei].maxv / ddrones[d.ddronei].n_drones
+
                     else:
                         d.wait_t_left -= simInput["dt"]
-                        d.x = ground_stat_pos[0]
-                        d.y = ground_stat_pos[1]
+                        d.x = ddrones[d.ddronei].x
+                        d.y = ddrones[d.ddronei].y
 
                 # The drone has reached the litter piece
                 elif d.t_busy <= t and d.state >= 0:
@@ -85,7 +94,7 @@ def simulate(simInput):
                         d.state = -1
 
                         # Determine the time needed to reach destination and store
-                        t_busy, dnext = new_d_t(d.x, d.y, ground_stat_pos[0], ground_stat_pos[1],
+                        t_busy, dnext = new_d_t(d.x, d.y, ddrones[d.ddronei].x, ddrones[d.ddronei].y,
                                                 simInput["v_drone"])
                         d.t_busy = t + t_busy
                         d.wait_t_left = d.t_wait_ground
@@ -94,7 +103,8 @@ def simulate(simInput):
                 elif d.t_busy <= t and d.state == -3:
                     if d.charge > d.charge0:
                         d.state = -1
-                        t_busy, dnext = new_d_t(d.x, d.y, ground_stat_pos[0], ground_stat_pos[1], d.v)
+                        t_busy, dnext = new_d_t(d.x, d.y, ddrones[d.ddronei].x, ddrones[d.ddronei].y, d.v)
+                        ddrones[d.ddronei].v += ddrones[d.ddronei].maxv / ddrones[d.ddronei].n_drones
                     else:
                         d.charge += d.charge0 * simInput["dt"] / d.rechargetime
 
@@ -103,8 +113,8 @@ def simulate(simInput):
                     # Headed to van
                     if litteri == -1:
                         # The drone is on its way to the van
-                        nx, ny, t_busy, dis = on_route(d.x, d.y, ground_stat_pos[0],
-                                                       ground_stat_pos[1], simInput["v_drone"], simInput["dt"])
+                        nx, ny, t_busy, dis = on_route(d.x, d.y, ddrones[d.ddronei].x,
+                                                       ddrones[d.ddronei].y, simInput["v_drone"], simInput["dt"])
                     # Headed to litter
                     elif litteri >= 0:
                         # The drone is on its way to a litter piece
@@ -120,36 +130,40 @@ def simulate(simInput):
                     d.y = ny
 
             if simInput["vanMovement"] >= 1:
-                ground_stat_pos[0], ground_stat_pos[1], t_busy, dis = on_route(ground_stat_pos[0], ground_stat_pos[1],
-                                                                               van_positions[0][cur_goal],
-                                                                               van_positions[1][cur_goal], simInput["v_ddrone"], simInput["dt"])
-                lit_avail[1] = recalc_lit_dist(littercoor, lit_avail, ground_stat_pos[0], ground_stat_pos[1])
+                for dd in range(len(ddrones)):
+                    ddrones[dd].x, ddrones[dd].y, t_busy, dis = on_route(ddrones[dd].x, ddrones[dd].y,
+                                                                                   ddrones[dd].waypoints[0][ddrones[dd].cur_goal],
+                                                                                   ddrones[dd].waypoints[1][ddrones[dd].cur_goal], ddrones[dd].v, simInput["dt"])
+                    lit_avail[1] = recalc_lit_dist(littercoor, lit_avail, ddrones[d.ddronei].x, ddrones[d.ddronei].y)
 
-                if ground_stat_pos[0] == van_positions[0][cur_goal] and ground_stat_pos[1] == van_positions[1][
-                    cur_goal]:
-                    if cur_goal < len(van_positions[0]) - 1:
-                        cur_goal += 1
-                    else:
-                        cur_goal = 0
+                    if ddrones[d.ddronei].x == ddrones[dd].waypoints[0][ddrones[dd].cur_goal] and ddrones[d.ddronei].y == ddrones[dd].waypoints[1][ddrones[dd].cur_goal]:
+                        if ddrones[dd].cur_goal < len(ddrones[dd].waypoints[0]) - 1:
+                            ddrones[dd].cur_goal += 1
+                        else:
+                            ddrones[dd].cur_goal = 0
 
             # check whether simulation is done
             if len(active_drones) == 0:
                 time.sleep(2)
                 run = False
-                print("Total drone distance is: " + str(totaldronedist) + " m")
-                print("End time is: " + str(t) + " s")
                 break
 
             t += simInput["dt"]
 
-        d_x = []
-        d_y = []
-        for d in drones:
-            d_x.append(d.x)
-            d_y.append(d.y)
+        if simInput["plotProcess"]:
+            d_x = []
+            d_y = []
+            for d in drones:
+                d_x.append(d.x)
+                d_y.append(d.y)
+            dd_x = []
+            dd_y = []
+            for dd in range(len(ddrones)):
+                dd_x.append(ddrones[dd].x)
+                dd_y.append(ddrones[dd].y)
 
-        plot_update(d_x, d_y, ground_stat_pos[0], ground_stat_pos[1], littercoor[0], littercoor[1],
-                    litterplot, groundplot, droneplot, figure)
+            plot_update(d_x, d_y, dd_x, dd_y, littercoor[0], littercoor[1],
+                        litterplot, groundplot, droneplot, figure)
 
     results = dict(totalT = t, totald = totaldronedist)
     return results

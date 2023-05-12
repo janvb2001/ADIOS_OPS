@@ -10,6 +10,7 @@ def litterDist(simInput):
     for i in range(simInput["litter_n"]):
         lit_avail[0].append(i)
 
+        rnd.seed(21*i)
         xlit = rnd.randint(0, simInput["x_size"])
         ylit = rnd.randint(0, simInput["y_size"])
         littercoor[0].append(xlit)

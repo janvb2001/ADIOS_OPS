@@ -1,14 +1,17 @@
 from math import sqrt
 
 class DrivingDrone:
-    def __init__(self, x_pos, y_pos, ddrone_v, waypoints):
+    def __init__(self, x_pos, y_pos, ddrone_v, waypoints, n_drones, maxv):
         self.x = x_pos
         self.y = y_pos
         self.v = ddrone_v
+        self.maxv = maxv
         self.waypoints = waypoints
+        self.n_drones = n_drones
+        self.cur_goal = 1
 
 
-def ddronePosData(simInput):
+def ddronePosData(simInput, par = []):
     # output: array [[xs], [ys]]. when first checkpoint is reached, the van will move to the next
     vanMoveChoice = simInput["vanMovement"]
     x_s = simInput["x_size"]
@@ -17,12 +20,18 @@ def ddronePosData(simInput):
 
     # Van starting position
     if vanMoveChoice == 0:
-        #Starts in middle
-        g_s = [int(x_s/2), int(y_s/2)]
+        # par = [x, y]
+        if len(par) > 0:
+            g_s = [int(par[0]), int(par[1])]
+        else:
+            # starts in middle
+            g_s = [int(x_s / 2), int(y_s / 2)]
         van_positions = g_s
     elif vanMoveChoice == 1:
-        x_clearance = 1/10 * x_s
-        y_clearance = 1/10 * y_s
+        # par = [x_clearance, y_clearance]
+
+        x_clearance = par[0]
+        y_clearance = par[1]
 
         ly = y_s - y_clearance
         lx = x_s - x_clearance
@@ -64,8 +73,12 @@ def ddronePosData(simInput):
 
 
     elif vanMoveChoice == 3:
-        n_x = 1/10 * x_s
-        y_c = 1/20 * y_s
+        # par = [n_x, y_c]
+
+        # n_x = 1/10 * x_s
+        # y_c = 1/20 * y_s
+        n_x = par[0]
+        y_c = par[1]
 
         x = 0
         y = y_c
@@ -96,7 +109,7 @@ def ddronePosData(simInput):
                     van_positions[1].append(y)
 
 
-    ddrone = DrivingDrone(g_s[0], g_s[1], simInput["v_ddrone"], van_positions)
+    ddrone = DrivingDrone(g_s[0], g_s[1], simInput["v_ddrone"], van_positions, simInput["drone_n"], simInput["v_ddrone"])
 
     simInput["ground_stat_pos"] = g_s
     simInput["van_positions"] = van_positions

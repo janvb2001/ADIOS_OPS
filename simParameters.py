@@ -21,6 +21,7 @@ simInput = dict(
 
     # sizes of area in m
     totalArea = 10000,       # m^2
+    plotProcess = True
 )
 simInput["x_size"] = sqrt(simInput["totalArea"])
 simInput["y_size"] = sqrt(simInput["totalArea"])
