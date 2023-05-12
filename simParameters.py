@@ -12,12 +12,12 @@ simInput = dict(
     t_recharge = 3 * 60,
     charge_start = 3 * 60,      # s         When the drone needs to start to go to the van for charging
 
-    runspeed = 100000,          # Factor wrt real-time
+    runspeed = 1000,          # Factor wrt real-time
 
     t_lit = 10,
     t_ground = 10,
 
-    dt = 0.1,  # s
+    dt = 1,  # s
 
     # sizes of area in m
     totalArea = 10000,       # m^2
@@ -26,4 +26,6 @@ simInput = dict(
 )
 simInput["x_size"] = sqrt(simInput["totalArea"])
 simInput["y_size"] = sqrt(simInput["totalArea"])
+
+#test
 
