@@ -2,7 +2,9 @@ from simFunctions import *
 import random as rnd
 import matplotlib.pyplot as plt
 import time
+from numba import jit
 
+@jit
 def simulate(simInput):
     # drone_n, litter_n, ground_stat_pos, van_positions, x_size, y_size, plot_driveplan, vanMovement, runspeed, v_drone, dt, v_van
     van_positions = simInput["van_positions"]

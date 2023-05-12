@@ -1,3 +1,4 @@
+
 class Drone:
     def __init__(self, x_pos, y_pos, drone_v, t_lit, t_ground, charge0, t_recharge, ddronei):
         self.x = x_pos

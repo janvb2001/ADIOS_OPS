@@ -1,6 +1,8 @@
 from generalFunc import *
 import random as rnd
+from numba import jit
 
+@jit
 def litterDist(simInput):
     #output:
     # Setting up the litter data arrays

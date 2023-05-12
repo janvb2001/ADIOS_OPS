@@ -1,4 +1,5 @@
 from math import sqrt
+from numba import jit
 
 class DrivingDrone:
     def __init__(self, x_pos, y_pos, ddrone_v, waypoints, n_drones, maxv):
@@ -10,7 +11,7 @@ class DrivingDrone:
         self.n_drones = n_drones
         self.cur_goal = 1
 
-
+@jit
 def ddronePosData(simInput, par = []):
     # output: array [[xs], [ys]]. when first checkpoint is reached, the van will move to the next
     vanMoveChoice = simInput["vanMovement"]
