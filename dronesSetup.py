@@ -13,4 +13,5 @@ class Drone:
         self.charge = charge0
         self.rechargetime = t_recharge
         self.ddronei = ddronei
+        # test
 
