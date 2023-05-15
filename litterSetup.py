@@ -25,3 +25,5 @@ def litterDist(simInput):
     simInput["littercoor"] = littercoor
 
     return simInput
+
+# test

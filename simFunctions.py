@@ -57,3 +57,4 @@ def plot_update(newxdrone, newydrone, newxvan, newyvan, newxlit, newylit, litter
     figure.canvas.draw()
     figure.canvas.flush_events()
 
+# test

@@ -42,3 +42,5 @@ def on_route(curx, cury, goalx, goaly, v, dt):
     dd = dist(curx, newx, cury, newy)
 
     return newx, newy, t_b, dd
+
+# test
