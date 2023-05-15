@@ -116,3 +116,5 @@ def ddronePosData(simInput, par = []):
     simInput["van_positions"] = van_positions
 
     return simInput, ddrone
+
+# test

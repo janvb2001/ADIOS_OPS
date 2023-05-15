@@ -288,3 +288,8 @@
 7 drones, 0.4 m/s, 16.666666666666668 spacing, 3 pattern, 4402.6999999984855 s
 7 drones, 0.4 m/s, 14.285714285714286 spacing, 1 pattern, 4265.899999997988 s
 7 drones, 0.4 m/s, 14.285714285714286 spacing, 3 pattern, 4330.799999998224 s
+7 drones, 0.4 m/s, 12.5 spacing, 1 pattern, 4195.799999997733 s
+7 drones, 0.4 m/s, 12.5 spacing, 3 pattern, 4188.999999997708 s
+7 drones, 0.4 m/s, 11.11111111111111 spacing, 1 pattern, 4098.299999997378 s
+7 drones, 0.4 m/s, 11.11111111111111 spacing, 3 pattern, 4081.1999999973837 s
+7 drones, 0.6 m/s, 25.0 spacing, 1 pattern, 4858.900000000145 s
