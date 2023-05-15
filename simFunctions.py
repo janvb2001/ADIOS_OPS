@@ -1,7 +1,7 @@
 from generalFunc import *
 from numba import jit
 
-@jit
+
 def van_reached(lit_a, drone_data, litter, d, v_drone):
 
     # Check whether there is still litter left to be taken
@@ -32,7 +32,7 @@ def van_reached(lit_a, drone_data, litter, d, v_drone):
 
     return nextitem, t_busy, lit_a
 
-@jit
+
 def recalc_lit_dist(lit, lit_a, gs_x, gs_y):
     distances = []
 
@@ -42,7 +42,7 @@ def recalc_lit_dist(lit, lit_a, gs_x, gs_y):
 
     return distances
 
-@jit
+
 def plot_update(newxdrone, newydrone, newxvan, newyvan, newxlit, newylit, litterplot, groundplot, droneplot, figure):
     # updating the plot
     litterplot.set_xdata(newxlit)

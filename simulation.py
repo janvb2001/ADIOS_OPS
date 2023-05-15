@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import time
 from numba import jit
 
-@jit
 def simulate(simInput):
     # drone_n, litter_n, ground_stat_pos, van_positions, x_size, y_size, plot_driveplan, vanMovement, runspeed, v_drone, dt, v_van
     van_positions = simInput["van_positions"]
@@ -59,6 +58,8 @@ def simulate(simInput):
 
                 # The drone is done with getting to the van
                 if d.t_busy <= t and d.state == -1:
+                    totaldronedist += dist(d.x, ddrones[d.ddronei].x, d.y, ddrones[d.ddronei].y)
+                    #print(dist(d.x, ddrones[d.ddronei].x, d.y, ddrones[d.ddronei].y))
                     if d.wait_t_left <= 0 and d.charge > simInput["charge_start"]:
                         # Selection of next item
                         nextitem, t_busy, lit_avail = van_reached(lit_avail, drones, littercoor, d, simInput["v_drone"])
@@ -87,6 +88,8 @@ def simulate(simInput):
 
                 # The drone has reached the litter piece
                 elif d.t_busy <= t and d.state >= 0:
+                    totaldronedist += dist(d.x, littercoor[0][d.state], d.y, littercoor[1][d.state])
+                    #print(dist(d.x, littercoor[0][d.state], d.y, littercoor[1][d.state]))
                     if d.wait_t_left <= 0:
                         # The litter is picked up so has no coordinate anymore
                         littercoor[0][d.state] = None
@@ -103,10 +106,13 @@ def simulate(simInput):
                     else:
                         d.wait_t_left -= simInput["dt"]
                 elif d.t_busy <= t and d.state == -3:
+                    totaldronedist += dist(d.x, van.x, d.y, van.y)
+                    #print(dist(d.x, van.x, d.y, van.y))
                     if d.charge > d.charge0:
                         d.state = -1
-                        t_busy, dnext = new_d_t(d.x, d.y, ddrones[d.ddronei].x, ddrones[d.ddronei].y, d.v)
+                        t_b, dnext = new_d_t(d.x, d.y, ddrones[d.ddronei].x, ddrones[d.ddronei].y, d.v)
                         ddrones[d.ddronei].v += ddrones[d.ddronei].maxv / ddrones[d.ddronei].n_drones
+                        d.t_busy = t + t_b
                     else:
                         d.charge += d.charge0 * simInput["dt"] / d.rechargetime
 
@@ -133,16 +139,18 @@ def simulate(simInput):
 
             if simInput["vanMovement"] >= 1:
                 for dd in range(len(ddrones)):
-                    ddrones[dd].x, ddrones[dd].y, t_busy, dis = on_route(ddrones[dd].x, ddrones[dd].y,
-                                                                                   ddrones[dd].waypoints[0][ddrones[dd].cur_goal],
-                                                                                   ddrones[dd].waypoints[1][ddrones[dd].cur_goal], ddrones[dd].v, simInput["dt"])
+                    if ddrones[dd].v > 0:
+                        ddrones[dd].x, ddrones[dd].y, t_busy, dis = on_route(ddrones[dd].x, ddrones[dd].y,
+                                                                                       ddrones[dd].waypoints[0][ddrones[dd].cur_goal],
+                                                                                       ddrones[dd].waypoints[1][ddrones[dd].cur_goal], ddrones[dd].v, simInput["dt"])
                     lit_avail[1] = recalc_lit_dist(littercoor, lit_avail, ddrones[d.ddronei].x, ddrones[d.ddronei].y)
 
                     if ddrones[d.ddronei].x == ddrones[dd].waypoints[0][ddrones[dd].cur_goal] and ddrones[d.ddronei].y == ddrones[dd].waypoints[1][ddrones[dd].cur_goal]:
                         if ddrones[dd].cur_goal < len(ddrones[dd].waypoints[0]) - 1:
                             ddrones[dd].cur_goal += 1
                         else:
-                            ddrones[dd].cur_goal = 0
+                            # ddrones[dd].cur_goal = 0
+                            None
 
             # check whether simulation is done
             if len(active_drones) == 0:
@@ -151,6 +159,8 @@ def simulate(simInput):
                 break
 
             t += simInput["dt"]
+
+
 
         if simInput["plotProcess"]:
             d_x = []

@@ -11,7 +11,7 @@ class DrivingDrone:
         self.n_drones = n_drones
         self.cur_goal = 1
 
-@jit
+
 def ddronePosData(simInput, par = []):
     # output: array [[xs], [ys]]. when first checkpoint is reached, the van will move to the next
     vanMoveChoice = simInput["vanMovement"]
