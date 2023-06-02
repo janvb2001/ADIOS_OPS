@@ -1,0 +1,111 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import time
+
+def plotSetup(li, dr, gr, area):
+    # https://www.galaxysofts.com/new/python-creating-a-real-time-3d-plot/
+
+    litCoor = np.array([np.zeros((len(li[0]),3)),np.zeros((len(li[1]),3)),np.zeros((len(li[2]),3))], dtype=object)
+    for i in range(len(li)):
+        for l in range(len(li[i])):
+            if li[i][l].avail:
+                litCoor[i][l][0] = li[i][l].x
+                litCoor[i][l][1] = li[i][l].y
+                litCoor[i][l][2] = li[i][l].z
+
+    droCoor = np.array([np.zeros((len(dr[0]),3)),np.zeros((len(dr[1]),3)),np.zeros((len(dr[2]),3))], dtype=object)
+    for i in range(len(dr)):
+        for j in range(len(dr[i])):
+            droCoor[i][j][0] = dr[i][j].x
+            droCoor[i][j][1] = dr[i][j].y
+            droCoor[i][j][2] = dr[i][j].z
+
+    map = plt.figure()
+    map_ax = Axes3D(map)
+
+    # # # Setting the axes properties
+    map_ax.set_xlim3d([0.0, area["xsize"]])
+    map_ax.set_ylim3d([0.0, area["ysize"]])
+    map_ax.set_zlim3d([0.0, 20.0])
+
+    lismall, = map_ax.plot3D(litCoor[0][:, 0], litCoor[0][:, 1], litCoor[0][:, 2], color='g', marker="o", markersize=2,linestyle="None")
+    limed, = map_ax.plot3D(litCoor[1][:, 0], litCoor[1][:, 1], litCoor[1][:, 2], color='orange', marker="o",markersize=2, linestyle="None")
+    lilar, = map_ax.plot3D(litCoor[2][:, 0], litCoor[2][:, 1], litCoor[2][:, 2], color='r', marker="o", markersize=2, linestyle="None")
+
+    drsmall, = map_ax.plot3D(droCoor[0][:, 0], droCoor[0][:, 1], droCoor[0][:, 2], color='g', marker="v", markersize=2, linestyle="None")
+    drmed, = map_ax.plot3D(droCoor[1][:, 0], droCoor[1][:, 1], droCoor[1][:, 2], color='orange', marker="v", markersize=4, linestyle="None")
+    drlar, = map_ax.plot3D(droCoor[2][:, 0], droCoor[2][:, 1], droCoor[2][:, 2], color='r', marker="v", markersize=6, linestyle="None")
+
+    grstat, = map_ax.plot3D(gr["x"], gr["y"], 0, color='purple', marker="D", markersize=7, linestyle="None")
+
+    # plt.show(block=True)
+
+    return map_ax, lismall, limed, lilar, drsmall, drmed, drlar
+
+
+def updateplot(plot, coordinates, id, amount=-1):
+    if amount == -1:
+        amount = len(coordinates[id])
+    x = coordinates[id][:amount, 0]
+    y = coordinates[id][:amount, 1]
+    z = coordinates[id][:amount, 2]
+
+    plot.set_xdata(x)
+    plot.set_ydata(y)
+    plot.set_3d_properties(z)
+
+    return plot
+
+
+def plot(li, dr, map_ax, lismall, limed, lilar, drsmall, drmed, drlar):
+    # https://www.galaxysofts.com/new/python-creating-a-real-time-3d-plot/
+
+    litCoor = np.array([np.zeros((len(li[0]), 3)), np.zeros((len(li[1]), 3)), np.zeros((len(li[2]), 3))], dtype=object)
+    amAvail = [0,0,0]
+    for i in range(3):
+        for l in range(len(li[i])):
+            if li[i][l].avail:
+                litCoor[i][amAvail[i]][0] = li[i][l].x
+                litCoor[i][amAvail[i]][1] = li[i][l].y
+                litCoor[i][amAvail[i]][2] = li[i][l].z
+                amAvail[i] += 1
+
+    droCoor = np.array([np.zeros((len(dr[0]), 3)), np.zeros((len(dr[1]), 3)), np.zeros((len(dr[2]), 3))], dtype=object)
+    for i in range(len(dr)):
+        for j in range(len(dr[i])):
+            droCoor[i][j][0] = dr[i][j].x
+            droCoor[i][j][1] = dr[i][j].y
+            droCoor[i][j][2] = dr[i][j].z
+
+    updateplot(lismall, litCoor, 0, amAvail[0])
+    updateplot(limed, litCoor, 1, amAvail[1])
+    updateplot(lilar, litCoor, 2, amAvail[2])
+
+    updateplot(drsmall, droCoor, 0)
+    updateplot(drmed, droCoor, 1)
+    updateplot(drlar, droCoor, 2)
+
+    # lismall.set_xdata(litCoor[0][:, 0])
+    # lismall.set_ydata(litCoor[0][:, 1])
+    # lismall.set_3d_properties(litCoor[0][:, 2])
+    # limed.set_xdata(litCoor[1][:, 0])
+    # limed.set_ydata(litCoor[1][:, 1])
+    # limed.set_3d_properties(litCoor[1][:, 2])
+    # lilar.set_xdata(litCoor[2][:, 0])
+    # lilar.set_ydata(litCoor[2][:, 1])
+    # lilar.set_3d_properties(litCoor[2][:, 2])
+    #
+    # drsmall.set_xdata(droCoor[0][:, 0])
+    # drsmall.set_ydata(droCoor[0][:, 1])
+    # drsmall.set_3d_properties(droCoor[0][:, 2])
+    # drmed.set_xdata(droCoor[1][:, 0])
+    # drmed.set_ydata(droCoor[1][:, 1])
+    # drmed.set_3d_properties(droCoor[1][:, 2])
+    # drlar.set_xdata(droCoor[2][:, 0])
+    # drlar.set_ydata(droCoor[2][:, 1])
+    # drlar.set_3d_properties(droCoor[2][:, 2])
+
+    plt.draw()
+    plt.show(block=False)
+    plt.pause(0.05)

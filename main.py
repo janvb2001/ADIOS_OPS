@@ -8,17 +8,17 @@ import time
 # Things to include:
 # - Drones should not get too close to each other
 # - Simulate the reasonable worst-case scenario
-#     - van position is not ideal
-#     - Garbage position is not ideal
-# - Include different litter types in the program
-# - Include different drone types in the program
-# - Include obstacles
-# - Include reconnaisance drone
+#     - van position is not ideal ~
+#     - Garbage position is not ideal ~
+# - Include different litter types in the program v
+# - Include different drone types in the program v
+# - Include obstacles ~
+# - Include reconnaisance drone ~
 # - Wind
-# - keep track of litter volume in driving drone
-# - keep track of when drone must be recharged
-# - 3D
-# - Drone accellerations
+# - keep track of litter volume in driving drone v
+# - keep track of when drone must be recharged v
+# - 3D v
+# - Drone accellerations ~
 
 # Done:
 # - Drones should have a delay at the ground station and each litter piece (Which can be deduced from req.)
@@ -27,7 +27,6 @@ import time
 from generalFunc import *
 from simParameters import *
 import numpy as np
-from tempfile import TemporaryFile
 
 # starting position of ground station
 from driving_droneSetup import *
@@ -85,20 +84,24 @@ results = np.array([])
 # n_dr = 7
 minTime = 5000
 dx_space = (1/5 * simInput["x_size"] - 1/15 * simInput["x_size"]) / 5
+save = False
 # while minTime > 3600:
-for n_dr in range(7,9,1):
+for n_dr in range(10,11,1):
+    # n_dr = 8
     mini = 5000
     simInput["drone_n"] = n_dr
-    for v_gdr in range(2,30,2):
-        v_gdr = v_gdr / 10
+    for v_gdr in range(330,331,10):
+        v_gdr = v_gdr / 1000
         simInput["v_ddrone"] = v_gdr
-        # simInput["v_ddrone"] = 0.37
-        for x_space in range(4,10,1):
+        # v_gdr = 0.36
+        # simInput["v_ddrone"] = 0.36
+        for x_space in range(116,117,2):
             # x_space = x_space * dx_space
             # x_space = x_space * dx_space
-            # x_space = 10.666666666666666
-            x_space = simInput["x_size"] / x_space
+            # x_space = 12
+            # x_space = simInput["x_size"] / x_space
 
+            x_space = x_space / 10
             # simInput["vanMovement"] = 2
             # simResults = runsim(simInput, x_space)
             #
@@ -107,9 +110,10 @@ for n_dr in range(7,9,1):
             # print(str(n_dr) + " drones, " + str(v_gdr) + " m/s, " + str(x_space) + " spacing, " + str(2) + " pattern, " + str(simResults["totalT"]) + " s")
             # np.append(results, np.array([n_dr, v_gdr, x_space, 2, simResults["totalT"]]))
 
-            for moveType in range(1, 4, 2):
+            for moveType in range(0, 1, 1):
                 if moveType != 2:
                     simInput["vanMovement"] = moveType
+                    # simInput["vanMovement"] = 1
 
                     simResults = runsim(simInput, x_space)
 
@@ -118,9 +122,10 @@ for n_dr in range(7,9,1):
                     printRes = "\n" + str(n_dr) + " drones, " + str(v_gdr) + " m/s, " + str(x_space) + " spacing, " + str(moveType) + " pattern, " + str(simResults["totalT"]) + " s"
                     print(printRes)
 
-                    f = open("testdata.txt", "a")
-                    f.write(printRes)
-                    f.close()
+                    if save:
+                        f = open("testdata.txt", "a")
+                        f.write(printRes)
+                        f.close()
 
                     #np.append(results, np.array([n_dr, v_gdr, x_space, moveType, simResults["totalT"]]))
 

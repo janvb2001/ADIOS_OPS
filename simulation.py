@@ -29,6 +29,17 @@ def simulate(simInput):
         for dd in range(len(ddrones)):
             dd_x.append(ddrones[dd].x)
             dd_y.append(ddrones[dd].y)
+        # fig, ax = plt.subplots(figsize=(8,6))
+        # plt.title("Litter Distribution")
+        # ax.plot(littercoor[0], littercoor[1], 'o', color='black', markersize=4)
+        # ax.plot(dd_x, dd_y, color='g', marker='s', markersize=10)
+        # ax.plot(d_x, d_y, 'o', color='b', markersize=6)
+        # ax.plot(van_positions[0], van_positions[1])
+        # ax.plot(simInput["van"].x, simInput["van"].y, 'o', color="red", markersize=10)
+        # fig.subplots_adjust(right=0.75)
+        # ax.legend(["Litter", "Ground drone", "Drone", "Ground Drone Path", "Van Position"], loc="center left", bbox_to_anchor = (0.75, 0.5), bbox_transform = fig.transFigure)
+        # plt.show()
+
 
         # setting up de figure with how each object is displayed
         figure, ax = plt.subplots(figsize=(10, 8))
