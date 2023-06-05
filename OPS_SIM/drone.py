@@ -1,9 +1,11 @@
 import numpy as np
+# import OPS_Simulation.control_and_stability.LQR_controller
+import OPS_Simulation.control_and_stability.quadcopter_full_state_space as ss
 
 from generalFunc import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz):
         self.x = x
         self.y = y
         self.z = z
@@ -19,9 +21,18 @@ class drone:
         self.litpickt = litpickt
         self.litdropt = litdropt
         self.state = 1              # 0 = ready for new litter, 1 = on route, 2 = driving, 3 = picking litter, 4 = dropping litter, 5 = charging, 6 = done and waiting at gs
-        self.waypoints = np.array([[0.,typeD*40,0.,0.],[typeD*40,0.,20.,sqrt((typeD*40)**2+20**2)],[100.,100.,20.,100.],[0.,100.,0.,sqrt(100**2+20**2)]])    #x, y, z, distance to previous
+        self.waypoints = np.array([[0.,typeD*40,0.,0.],[typeD*40,0.,20.,sqrt((typeD*40)**2+20**2)],[100.,100.,20.,100.],[0.,100.,0.,sqrt(100**2+20**2)]])    #x, y, z, horizontal distance to previous
         self.goal = np.array([0.,100.,0., 0.])
         self.waittogo = 0.
+
+        self.b = b
+        self.d = d
+        self.k = k
+        self.m = m
+        self.Ixx = Ixx
+        self.Iyy = Iyy
+        self.Izz = Izz
+
 
     def moveToWaypoint(self, curd, dmax, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -81,15 +92,15 @@ class drone:
     def flying(self, dt):
         hordmax = self.vmax * dt
 
-        vdis = self.vertvmax * dt
-        if self.z + vdis < 20 and self.goal[3] > 30:
-            self.z += vdis
-        elif self.goal[3] < 30 and self.z - vdis > 1:
-            self.z -= vdis
-        elif self.goal[3] < 10 and self.z - vdis < 1:
-            self.z = 1
-        elif self.goal[3] > 30:
-            self.z = 20
+        # vdis = self.vertvmax * dt
+        # if self.z + vdis < 20 and self.goal[3] > 30:
+        #     self.z += vdis
+        # elif self.goal[3] < 30 and self.z - vdis > 1:
+        #     self.z -= vdis
+        # elif self.goal[3] < 10 and self.z - vdis < 1:
+        #     self.z = 1
+        # elif self.goal[3] > 30:
+        #     self.z = 20
 
 
         newWaypoint = self.moveToWaypoint(0, hordmax, 0)
@@ -100,6 +111,10 @@ class drone:
             self.waypoints = np.array([[50,50,0,0]])
             self.goal = np.array([50,50,0,0])
             self.state = 1
+
+        g = 9.81
+        A = ss.set_A(g)
+
 
 
     def updateDrone(self, dt):

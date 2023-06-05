@@ -23,6 +23,14 @@ droneInput = dict(
 
     litPickT=np.array([     10,     10,     10]),           # How long it takes to pick litter when on top [s]
     litDropT=np.array([     10,     10,     10]),           # How long it takes to drop litter when at gs [s]
+
+    b=np.array([            3e-6,   3e-6,   3e-6]),
+    d=np.array([            0.1,    0.1,    0.1]),
+    k=np.array([            3e-8,   3e-8,   3e-8]),
+    m=np.array([            1.2,    1.2,    1.2]),
+    Ixx=np.array([          0.00433,    0.00433,    0.00433]),
+    Iyy=np.array([          0.00433,    0.00433,    0.00433]),
+    Izz=np.array([          0.008,      0.008,      0.008]),
 )
 
 groundStatInput = dict(
