@@ -1,6 +1,6 @@
 import numpy as np
 # import OPS_Simulation.control_and_stability.LQR_controller
-import OPS_Simulation.control_and_stability.quadcopter_full_state_space as ss
+import State_space.control_and_stability.quadcopter_full_state_space as ss
 
 from generalFunc import *
 
@@ -112,8 +112,8 @@ class drone:
             self.goal = np.array([50,50,0,0])
             self.state = 1
 
-        g = 9.81
-        A = ss.set_A(g)
+        # g = 9.81
+        # A = ss.set_A(g)
 
 
 
