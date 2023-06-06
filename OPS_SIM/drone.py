@@ -1,15 +1,19 @@
 import numpy as np
 # import OPS_Simulation.control_and_stability.LQR_controller
 import State_space.control_and_stability.quadcopter_full_state_space as ss
+import State_space.control_and_stability.LQR_controller as LQR_controller
 
+from math import pi
 from generalFunc import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.v = 0
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+        self.vx = float(0)
+        self.vy = float(0)
+        self.vz = float(0)
         self.typeD = typeD
         self.vertvmax = verv
         self.vmax = mv
@@ -32,6 +36,22 @@ class drone:
         self.Ixx = Ixx
         self.Iyy = Iyy
         self.Izz = Izz
+        self.phi = 0
+        self.theta = 0
+        self.psi = 0
+        self.phi_dot = 0
+        self.theta_dot = 0
+        self.psi_dot = 0
+
+        self.A = ss.get_A(g)
+        self.B = ss.get_B(self.m, self.Ixx, self.Iyy, self.Izz)
+        self.C = ss.get_C()
+        self.D = ss.get_D()
+        self.Xmat = np.array([[self.x], [self.y], [self.z], [self.vx], [self.vy], [self.vz], [self.phi], [self.theta], [self.psi], [self.phi_dot], [self.theta_dot], [self.psi_dot]])
+        self.desiredXmat = np.array([[0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
+        self.lqr_controller = LQR_controller.LQR_controller()
+        self.U = [0,0,0,0]
+
 
 
     def moveToWaypoint(self, curd, dmax, curw):
@@ -103,17 +123,38 @@ class drone:
         #     self.z = 20
 
 
-        newWaypoint = self.moveToWaypoint(0, hordmax, 0)
-        if newWaypoint > 0:
-            self.waypoints = self.waypoints[newWaypoint:]
-        elif newWaypoint == -1 and self.z <= 1:
-            self.waittogo = 10
-            self.waypoints = np.array([[50,50,0,0]])
-            self.goal = np.array([50,50,0,0])
-            self.state = 1
+        # newWaypoint = self.moveToWaypoint(0, hordmax, 0)
+        # if newWaypoint > 0:
+        #     self.waypoints = self.waypoints[newWaypoint:]
+        # elif newWaypoint == -1 and self.z <= 1:
+        #     self.waittogo = 10
+        #     self.waypoints = np.array([[50,50,0,0]])
+        #     self.goal = np.array([50,50,0,0])
+        #     self.state = 1
 
-        # g = 9.81
-        # A = ss.set_A(g)
+        self.desiredXmat[0] = 50
+        self.desiredXmat[1] = 50
+        self.desiredXmat[2] = 20
+        self.desiredXmat[7] = 15/180*pi
+
+        w_array = self.lqr_controller.get_motor_rotation_speeds(self.Xmat, self.desiredXmat, 9.80665, self, dt)
+
+        self.U = ss.get_U_plus_config(w_array, 9.80665, self)
+        X_dot = np.dot(self.A, self.Xmat) + np.dot(self.B, self.U)
+        self.Y = np.dot(self.C, self.Xmat) + np.dot(self.D, self.U)
+        self.Xmat += X_dot * dt
+
+        # print(self.Xmat)
+
+        self.x = self.Xmat[0]
+        self.y = self.Xmat[1]
+        self.z = self.Xmat[2]
+        self.vx = self.Xmat[3]
+        self.vy = self.Xmat[4]
+        self.vz = self.Xmat[5]
+        print("x: ", self.x, ", y: ", self.y, ", z: ", self.z, ", vx: ", self.vx, ", theta: ", self.Xmat[7])
+
+
 
 
 

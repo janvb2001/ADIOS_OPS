@@ -33,8 +33,8 @@ def plotSetup(li, dr, gr, area):
     limed, = map_ax.plot3D(litCoor[1][:, 0], litCoor[1][:, 1], litCoor[1][:, 2], color='orange', marker="o",markersize=2, linestyle="None")
     lilar, = map_ax.plot3D(litCoor[2][:, 0], litCoor[2][:, 1], litCoor[2][:, 2], color='r', marker="o", markersize=2, linestyle="None")
 
-    drsmall, = map_ax.plot3D(droCoor[0][:, 0], droCoor[0][:, 1], droCoor[0][:, 2], color='g', marker="v", markersize=2, linestyle="None")
-    drmed, = map_ax.plot3D(droCoor[1][:, 0], droCoor[1][:, 1], droCoor[1][:, 2], color='orange', marker="v", markersize=4, linestyle="None")
+    drsmall, = map_ax.plot3D(droCoor[0][:, 0], droCoor[0][:, 1], droCoor[0][:, 2], color='g', marker="v", markersize=6, linestyle="None")
+    drmed, = map_ax.plot3D(droCoor[1][:, 0], droCoor[1][:, 1], droCoor[1][:, 2], color='orange', marker="v", markersize=6, linestyle="None")
     drlar, = map_ax.plot3D(droCoor[2][:, 0], droCoor[2][:, 1], droCoor[2][:, 2], color='r', marker="v", markersize=6, linestyle="None")
 
     grstat, = map_ax.plot3D(gr["x"], gr["y"], 0, color='purple', marker="D", markersize=7, linestyle="None")

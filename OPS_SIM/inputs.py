@@ -10,7 +10,7 @@ litterInput = dict(
 
 droneInput = dict(
     dronetotal=10,                                          # total amount of drones
-    amountDrone=np.array([  4,      4,      2]),            # n of drones per type
+    amountDrone=np.array([  1,      0,      0]),            # n of drones per type
 
     vertv=np.array([        3,      3,      3]),            # Max vertical v per type [m/s]
     maxv=np.array([         10,     10,     10]),           # Max horizontal v per type [m/s]
@@ -44,7 +44,7 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=3,         #runspeed compared to real-time
+    runspeed=1,         #runspeed compared to real-time
     maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=0.1,                   #time step taken at every loop instance
+    dt=0.001,                   #time step taken at every loop instance
 )
