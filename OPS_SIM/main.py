@@ -11,10 +11,10 @@ from simulation import *
 drones, litters = setupClasses(litterInput, droneInput, groundStatInput, areaInput)
 
 # setup the 3D plot
-map_ax, lip0, lip1, lip2, drp0, drp1, drp2 = plotSetup(litters, drones, groundStatInput, areaInput)
+map_ax, lip0, lip1, drp0, drp1 = plotSetup(litters, drones, groundStatInput, areaInput)
 
 # simulate
-simulate(drones, litters, groundStatInput, simPar, map_ax, lip0, lip1, lip2, drp0, drp1, drp2)
+simulate(drones, litters, groundStatInput, simPar, map_ax, lip0, lip1, drp0, drp1)
 
 
 

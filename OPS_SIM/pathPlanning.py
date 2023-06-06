@@ -12,5 +12,6 @@ def pathPlannning(drone, litters, obstructions):
         None
     else:
         # ...
+        None
 
 
