@@ -1,4 +1,4 @@
-import OPS_SIM.inputs as inputs
+import inputs as inputs
 
 import pytest
 import unittest
