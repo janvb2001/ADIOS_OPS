@@ -17,9 +17,9 @@ droneInput = dict(
     dronetotal=5,  # total amount of drones
     amountDrone=np.array([2, 2, 1]),  # n of drones per type
 
-    vertv=np.array([4, 4, 4]),  # Max vertical v per type [m/s]
-    maxv=np.array([7, 7, 7]),  # Max horizontal v per type [m/s]
-    drivev=np.array([0.5, 0.5, 0.5]),  # Max drive v per type [m/s]
+    vertv=np.array([1, 3, 6]),  # Max vertical v per type [m/s]
+    maxv=np.array([5, 6, 7]),  # Max horizontal v per type [m/s]
+    drivev=np.array([0.5, 0.6, 0.7]),  # Max drive v per type [m/s]
 
     maxvol=np.array([450, 0, 0]),  # Max volume for litter storage [cm^3]
 
@@ -50,8 +50,41 @@ areaInput = dict(
 
 class test_setup(unittest.TestCase):
 
-    def test_setupClasses(self):
+    def test_drone_setup(self):
 
         actual_drones, actual_litters = setup.setupClasses(litterInput, droneInput, groundStatInput, areaInput)
 
-        print(actual_drones)
+        with self.subTest():
+            drone = actual_drones[0][0]
+            actual_drone_properties = [drone.litdropt, drone.d, drone.Ixx]
+            expected_drone_properties = [4, 0.05, 0.00430]
+
+            np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
+
+        with self.subTest():
+            drone = actual_drones[0][1]
+            actual_drone_properties = [drone.vertvmax, drone.maxvol, drone.k]
+            expected_drone_properties = [1, 450, 4e-8]
+
+            np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
+
+        with self.subTest():
+            drone = actual_drones[1][0]
+            actual_drone_properties = [drone.y, drone.power, drone.batLifeMax]
+            expected_drone_properties = [0, 450, 1610]
+
+            np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
+
+        with self.subTest():
+            drone = actual_drones[1][1]
+            actual_drone_properties = [drone.drivevmax, drone.litdropt, drone.Izz]
+            expected_drone_properties = [0.6, 5, 0.007]
+
+            np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
+
+        with self.subTest():
+            drone = actual_drones[2][0]
+            actual_drone_properties = [drone.vmax, drone.d, drone.Iyy]
+            expected_drone_properties = [7, 0.09, 0.00436]
+
+            np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)

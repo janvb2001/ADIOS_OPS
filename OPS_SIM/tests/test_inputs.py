@@ -47,7 +47,7 @@ class test_inputs(unittest.TestCase):
         with self.subTest():
             litterInput = inputs.litterInput
             actual_arrays_dims = [len(litterInput["littern"]), len(litterInput["minvol"]), len(litterInput["maxvol"])]
-            expected_array_dims = self.number_of_drone_types * np.ones(3)
+            expected_array_dims = 2 * np.ones(3)
 
             np.testing.assert_array_equal(expected_array_dims, actual_arrays_dims)
 
