@@ -4,3 +4,6 @@
 [submodule "OPS_SIM\\State_space"]
 	path = OPS_SIM\\State_space
 	url = https://github.com/ADIOS-DSE/OPS_Simulation.git
+[submodule "OPS_SIM/OPS_Simulation"]
+	path = OPS_SIM/OPS_Simulation
+	url = https://github.com/ADIOS-DSE/OPS_Simulation.git
