@@ -2,6 +2,7 @@ import numpy as np
 # import OPS_Simulation.control_and_stability.LQR_controller
 import OPS_Simulation.control_and_stability.quadcopter_full_state_space as ss
 import OPS_Simulation.control_and_stability.LQR_controller as LQR_controller
+import scipy.io as io
 
 from math import pi
 from generalFunc import *
@@ -11,16 +12,16 @@ class drone:
     def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
-        self.vertvmax = verv
+        self.vertvmax = float(verv)
         self.volume = 0.
-        self.vmax = mv
-        self.drivevmax = drv
-        self.maxvol = maxvol
-        self.power = p
-        self.batLifeMax = bat
-        self.batLife = bat
-        self.litpickt = litpickt
-        self.litdropt = litdropt
+        self.vmax = float(mv)
+        self.drivevmax = float(drv)
+        self.maxvol = float(maxvol)
+        self.power = float(p)
+        self.batLifeMax = float(bat)
+        self.batLife = float(bat)
+        self.litpickt = float(litpickt)
+        self.litdropt = float(litdropt)
         self.state = 0              # 0 = ready for new litter, 1 = on route, 2 = driving, 3 = picking litter, 4 = dropping litter, 5 = charging, 6 = done and waiting at gs
         self.waypoints = [[[float(x),float(y),float(z),0]]]
         # self.waypoints = [[0, 0, 20, 0], [0, 50, 10, 0], [100, 50, 10, 0], [60, 60, 8, 0], [80, 80, 3, 0],
@@ -45,6 +46,9 @@ class drone:
         self.desiredX = np.array([[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.]])
         self.lqr_controller = LQR_controller.LQR_controller()
         self.U = [0.,0.,0.,0.]
+
+        self.K = np.matrix(io.loadmat("OPS_Simulation/control_and_stability/Matlab/own_uav/K.mat")['K'].reshape(4, 12))
+        self.E = np.linalg.inv((np.identity(12) - self.A + self.B * self.K))
 
         self.curdes = 0
         self.curway = 0
@@ -86,7 +90,8 @@ class drone:
         self.U = ss.get_U_plus_config(w_array, 9.80665, self)
         X_dot = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.Y = np.dot(self.C, self.X) + np.dot(self.D, self.U)
-        self.X += X_dot * dt
+        # self.X += X_dot * dt
+        self.X = self.E * (self.X + self.B*self.K*self.desiredX)
 
     def delaying(self, dt):
         # Function is called when waiting time >0. This function reduces the time left to wait and when it is
@@ -174,6 +179,7 @@ class drone:
                 break
 
         self.state = 1
+        self.flyingto = 0
         self.waypoints = way
         self.litteri = liti
 
@@ -188,7 +194,7 @@ class drone:
 
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.current][0], " desy: ", self.waypoints[self.current][1], " desz: ", self.waypoints[self.current][2])
-        print(d)
+        # print(d)
         if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1:
             # Waypoint reached
             self.curway += 1
@@ -199,7 +205,7 @@ class drone:
 
             if self.flyingto == 0:
                 # Drone has landed and now drives to litter
-                self.X[2] = 0
+                self.X[2] = 0.
                 self.state = 2
                 # self.waypoints = [[self.goal]]
             elif self.flyingto == 1:
