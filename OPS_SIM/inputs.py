@@ -2,9 +2,9 @@ import numpy as np
 
 litterInput = dict(
     amount=1000,
-    littern=np.array([  400,    400,    200]),
-    minvol=np.array([   0,      50,     100]),
-    maxvol=np.array([   50,     500,    500]),
+    littern=np.array([  500,    500]),
+    minvol=np.array([   0,      50]),
+    maxvol=np.array([   50,     500]),
     seed=3953,
 )
 
