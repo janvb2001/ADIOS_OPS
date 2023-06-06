@@ -1,4 +1,4 @@
-import OPS_SIM.litter as Litter
+import litter as Litter
 
 import unittest
 import pytest

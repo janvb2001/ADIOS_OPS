@@ -1,4 +1,4 @@
-import OPS_SIM.generalFunc as generalFunc
+import generalFunc as generalFunc
 import unittest
 import pytest
 
