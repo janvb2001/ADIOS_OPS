@@ -4,7 +4,7 @@ import random as rnd
 from drone import *
 from litter import *
 
-def setupClasses(litterIn, droneIn, gsIn, areaIn):
+def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar):
     #drones = np.zeros(droneIn["dronetotal"])
     drones = []
     for i in range(len(droneIn["amountDrone"])):
@@ -13,7 +13,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn):
             d = drone(gsIn["x"], gsIn["y"], 0, i, droneIn["vertv"][i], droneIn["maxv"][i], droneIn["drivev"][i],
                       droneIn["maxvol"][i], droneIn["power"][i], droneIn["maxBat"][i], droneIn["litPickT"][i],
                       droneIn["litDropT"][i], droneIn["b"][i], droneIn["d"][i], droneIn["k"][i], droneIn["m"][i],
-                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665)
+                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"])
 
             drones[i].append(d)
 

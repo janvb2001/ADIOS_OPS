@@ -9,7 +9,7 @@ from generalFunc import *
 from pathPlanning import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g, dt):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -48,7 +48,7 @@ class drone:
         self.U = [0.,0.,0.,0.]
 
         self.K = np.matrix(io.loadmat("OPS_Simulation/control_and_stability/Matlab/own_uav/K.mat")['K'].reshape(4, 12))
-        self.E = np.linalg.inv((np.identity(12) - self.A + self.B * self.K))
+        self.E = np.linalg.inv((np.identity(12) - self.A * dt + self.B * dt * self.K))
 
         self.curdes = 0
         self.curway = 0
@@ -85,13 +85,13 @@ class drone:
         self.desiredX[1] = float(desy)
         self.desiredX[2] = float(desz)
 
-        w_array = self.lqr_controller.get_motor_rotation_speeds(self.X, self.desiredX, 9.80665, self, dt)
+        w_array = self.lqr_controller.get_motor_rotation_speeds(self.X, self.desiredX, 9.80665, self, self.K)
 
         self.U = ss.get_U_plus_config(w_array, 9.80665, self)
         X_dot = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.Y = np.dot(self.C, self.X) + np.dot(self.D, self.U)
         # self.X += X_dot * dt
-        self.X = self.E * (self.X + self.B*self.K*self.desiredX)
+        self.X = self.E * (self.X + self.B*self.K*dt*self.desiredX)
 
     def delaying(self, dt):
         # Function is called when waiting time >0. This function reduces the time left to wait and when it is
@@ -166,7 +166,10 @@ class drone:
         while len(way) < n:
             if litters[self.typeD][i].avail:
                 litters[self.typeD][i].avail = False
-                way.append([[litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]])
+
+                coorend = [litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
+                coormiddle = [(coorend[0]+self.X[0][0])/2, (coorend[1]+self.X[1][0])/2, 10, i]
+                way.append([coorend])
                 liti.append(i)
                 if len(way) == 1:
                     self.goal = [litters[self.typeD][i].x, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
@@ -177,8 +180,8 @@ class drone:
                 if len(way) == 0:
                     self.state = 6
                 break
-
-        self.state = 1
+        if self.state != 6:
+            self.state = 1
         self.flyingto = 0
         self.waypoints = way
         self.litteri = liti
@@ -192,14 +195,15 @@ class drone:
     def flying(self, dt):
 
 
+        # print("X: ", self.X, ", waypoints: ", self.waypoints)
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.current][0], " desy: ", self.waypoints[self.current][1], " desz: ", self.waypoints[self.current][2])
         # print(d)
-        if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1:
+        if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1.1:
             # Waypoint reached
             self.curway += 1
             self.calcNextPos(self.waypoints[self.curdes][self.curway][0], self.waypoints[self.curdes][self.curway][1], self.waypoints[self.curdes][self.curway][2], dt)
-        elif d < 1.1:
+        elif d < 0.2:
             #Not yet able to get closer than 0.8
             #Destination reached
 
