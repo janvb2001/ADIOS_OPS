@@ -58,7 +58,7 @@ class drone:
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
 
-        self.w_array = np.matrix([[0], [0], [0], [0]])
+        self.w_array = np.matrix([[1], [2], [3], [4]])
 
     def moveToWaypoint(self, curd, dmax, curdes, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -86,9 +86,9 @@ class drone:
         self.desiredX[1] = float(desy)
         self.desiredX[2] = float(desz)
 
-        w_array = self.lqr_controller.get_motor_rotation_speeds(self.X, self.desiredX, 9.80665, self, dt)
+        self.w_array = self.lqr_controller.get_motor_rotation_speeds(self.X, self.desiredX, 9.80665, self, dt)
 
-        self.U = ss.get_U_plus_config(w_array, 9.80665, self)
+        self.U = ss.get_U_plus_config(self.w_array, 9.80665, self)
         X_dot = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.Y = np.dot(self.C, self.X) + np.dot(self.D, self.U)
         # self.X += X_dot * dt
@@ -230,13 +230,13 @@ class drone:
 
         P = 0
 
-        for w in self.w_array[0]:
+        for w in self.w_array[:,0]:
             T_prop = self.b * w**2
-            P_prop = T_prop**1.5 / (2 * 1.225 * self.S_blade)
+            P_prop = T_prop * np.sqrt(T_prop) / np.sqrt(2 * 1.225 * self.S_blade)
             P += P_prop
 
-        self.batLife -= P*dt
-
+        delta_E = max(-P*dt, -50)
+        self.batLife += delta_E
 
     def updateDrone(self, dt, litters, gs):
         # Function: calculate next position and change drone position
