@@ -326,11 +326,11 @@ def main(win, width):
 				obstructgrid = np.zeros((ROWS, ROWS))
 				for i in range(len(obstructcor)):
 					obstructgrid[obstructcor[i][1]][obstructcor[i][0]] = 1
-				print(obstructgrid)
+				print('grid of obstruction: ',obstructgrid)
 				pathgrid = np.zeros((ROWS, ROWS))
-				for i in range(len(obstructcor)):
+				for i in range(len([pathcor1])):
 					pathgrid[pathcor1[i][1]][pathcor1[i][0]] = 1
-				print(pathgrid)
+				print('grid of path1: ',pathgrid)
 
 
 
