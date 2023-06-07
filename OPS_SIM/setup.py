@@ -12,8 +12,8 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar):
         for j in range(droneIn["amountDrone"][i]):
             d = drone(gsIn["x"], gsIn["y"], 0, i, droneIn["vertv"][i], droneIn["maxv"][i], droneIn["drivev"][i],
                       droneIn["maxvol"][i], droneIn["power"][i], droneIn["maxBat"][i], droneIn["litPickT"][i],
-                      droneIn["litDropT"][i], droneIn["b"][i], droneIn["d"][i], droneIn["k"][i], droneIn["m"][i], droneIn["S_blade"][i],
-                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665)
+                      droneIn["litDropT"][i], droneIn["recharget"][i], droneIn["b"][i], droneIn["d"][i], droneIn["k"][i], droneIn["m"][i], droneIn["S_blade"][i],
+                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"])
 
             drones[i].append(d)
 

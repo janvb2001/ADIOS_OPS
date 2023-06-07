@@ -19,10 +19,11 @@ droneInput = dict(
     maxvol=np.array([       500,    0]),            # Max volume for litter storage [cm^3]
 
     power=np.array([        450,    450]),          # Power usage of the drone [W]
-    maxBat=np.array([       1620,   1620]),         # Battery storage [kJ]
+    maxBat=np.array([       1620000,   1620000]),         # Battery storage [J]
 
     litPickT=np.array([     2,     2]),           # How long it takes to pick litter when on top [s]
     litDropT=np.array([     2,     2]),           # How long it takes to drop litter when at gs [s]
+    recharget=np.array([    180,    180]),
 
     b=np.array([            3e-6,   3e-6]),
     d=np.array([            0.1,    0.1]),
@@ -49,7 +50,7 @@ areaInput = dict(
 simPar = dict(
     runspeed=100,         #runspeed compared to real-time
     maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=1,                   #time step taken at every loop instance
+    dt=0.1,                   #time step taken at every loop instance
 )
 
 obstDetecPar = dict(
