@@ -1,8 +1,9 @@
 import pygame
 import math
 from queue import PriorityQueue
+import numpy as np
 
-WIDTH = 500
+WIDTH = 1000
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A star Finding Algorithm")
 
@@ -66,6 +67,7 @@ class Spot:
 
 	def make_barrier(self):
 		self.color = BLACK
+		obstructcor.append(self.get_pos())
 
 	def make_end1(self):
 		self.color = TURQUOISE
@@ -107,6 +109,7 @@ class Spot:
 pathcor1 = []
 pathcor2 = []
 pathcor3 = []
+obstructcor = []
 
 def h(p1, p2):
 	x1, y1 = p1
@@ -191,6 +194,7 @@ def algorithm(draw, grid, start, end1, end2, end3):
 			quitter += 1
 
 		if quitter == 3:
+			print('the coordinates of the barriers are: ', obstructcor)
 			return True
 
 		for neighbor in current.neighbors:
@@ -212,7 +216,6 @@ def algorithm(draw, grid, start, end1, end2, end3):
 
 		if current != start:
 			current.make_closed()
-
 	return False
 
 
@@ -256,7 +259,6 @@ def get_clicked_pos(pos, rows, width):
 
 	return row, col
 
-
 def main(win, width):
 	ROWS = 40
 	grid = make_grid(ROWS, width)
@@ -296,6 +298,7 @@ def main(win, width):
 				elif spot != end1 and spot != end2 and spot != end3 and spot != start:
 					spot.make_barrier()
 
+
 			elif pygame.mouse.get_pressed()[2]: # RIGHT
 				pos = pygame.mouse.get_pos()
 				row, col = get_clicked_pos(pos, ROWS, width)
@@ -318,6 +321,19 @@ def main(win, width):
 
 					algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end1, end2, end3)
 
+				#MAKE GRIDS FOR BOTH PATH AND OBSTRUCTS
+				# OBSTRUCT:
+				obstructgrid = np.zeros((ROWS, ROWS))
+				for i in range(len(obstructcor)):
+					obstructgrid[obstructcor[i][1]][obstructcor[i][0]] = 1
+				print(obstructgrid)
+				pathgrid = np.zeros((ROWS, ROWS))
+				for i in range(len(obstructcor)):
+					pathgrid[pathcor1[i][1]][pathcor1[i][0]] = 1
+				print(pathgrid)
+
+
+
 				if event.key == pygame.K_c:
 					start = None
 					end1 = None
@@ -325,7 +341,10 @@ def main(win, width):
 					end3 = None
 					grid = make_grid(ROWS, width)
 
+	#make path grid
+
+	#make obstruct grid
+
 	pygame.quit()
 
 main(WIN, WIDTH)
-
