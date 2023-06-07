@@ -58,7 +58,7 @@ class drone:
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
 
-
+        self.w_array = np.matrix([[0], [0], [0], [0]])
 
     def moveToWaypoint(self, curd, dmax, curdes, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -227,6 +227,16 @@ class drone:
 
         # Calculating the drone power and updating battery
         # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
+
+        P = 0
+
+        for w in self.w_array[0]:
+            T_prop = self.b * w**2
+            P_prop = T_prop**1.5 / (2 * 1.225 * self.S_blade)
+            P += P_prop
+
+        self.batLife -= P*dt
+
 
     def updateDrone(self, dt, litters, gs):
         # Function: calculate next position and change drone position
