@@ -24,7 +24,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn):
         for j in range(litterIn["littern"][i]):
             lx = rnd.random() * areaIn["xsize"]
             ly = rnd.random() * areaIn["ysize"]
-            lvol = rnd.random() * (litterIn["maxvol"][i] - litterIn["minvol"]) + litterIn["minvol"]
+            lvol = rnd.random() * (litterIn["maxvol"][i] - litterIn["minvol"][i]) + litterIn["minvol"][i]
 
             l = litter(lx, ly, 0, i, lvol)
             litters[i].append(l)
