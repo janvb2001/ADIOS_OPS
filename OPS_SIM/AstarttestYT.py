@@ -179,13 +179,15 @@ def algorithm(draw, grid, start, end1, end2, end3):
 		if current == end2:
 			reconstruct_path2(came_from, end2, draw)
 			end2.make_end2()
-			#cocopa2 = #coordinates of corners path 2
+			print(pathcor2)
+			print('the coordinates of the corners of path 2 are: ', determine_corners(pathcor2))
 			quitter += 1
 
 		if current == end3:
 			reconstruct_path3(came_from, end3, draw)
 			end3.make_end3()
-			#cocopa3 = #coordinates of corners path 3
+			print(pathcor3)
+			print('the coordinates of the corners of path 3 are: ', determine_corners(pathcor3))
 			quitter += 1
 
 		if quitter == 3:
