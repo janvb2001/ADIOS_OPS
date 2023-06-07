@@ -12,8 +12,8 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar):
         for j in range(droneIn["amountDrone"][i]):
             d = drone(gsIn["x"], gsIn["y"], 0, i, droneIn["vertv"][i], droneIn["maxv"][i], droneIn["drivev"][i],
                       droneIn["maxvol"][i], droneIn["power"][i], droneIn["maxBat"][i], droneIn["litPickT"][i],
-                      droneIn["litDropT"][i], droneIn["b"][i], droneIn["d"][i], droneIn["k"][i], droneIn["m"][i],
-                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"])
+                      droneIn["litDropT"][i], droneIn["b"][i], droneIn["d"][i], droneIn["k"][i], droneIn["m"][i], droneIn["S_blade"],
+                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665)
 
             drones[i].append(d)
 
@@ -24,7 +24,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar):
         for j in range(litterIn["littern"][i]):
             lx = rnd.random() * areaIn["xsize"]
             ly = rnd.random() * areaIn["ysize"]
-            lvol = rnd.random() * (litterIn["maxvol"][i] - litterIn["minvol"]) + litterIn["minvol"]
+            lvol = rnd.random() * (litterIn["maxvol"][i] - litterIn["minvol"][i]) + litterIn["minvol"][i]
 
             l = litter(lx, ly, 0, i, lvol)
             litters[i].append(l)

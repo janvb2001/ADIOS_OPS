@@ -6,7 +6,7 @@ import numpy as np
 
 class test_inputs(unittest.TestCase):
 
-    number_of_drone_types = 3
+    number_of_drone_types = 2
 
     def test_dict_keys(self):
 

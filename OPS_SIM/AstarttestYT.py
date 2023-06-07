@@ -1,8 +1,9 @@
 import pygame
 import math
 from queue import PriorityQueue
+import numpy as np
 
-WIDTH = 800
+WIDTH = 1000
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A star Finding Algorithm")
 
@@ -66,6 +67,7 @@ class Spot:
 
 	def make_barrier(self):
 		self.color = BLACK
+		obstructcor.append(self.get_pos())
 
 	def make_end1(self):
 		self.color = TURQUOISE
@@ -104,31 +106,46 @@ class Spot:
 	def __lt__(self, other):
 		return False
 
+pathcor1 = []
+pathcor2 = []
+pathcor3 = []
+obstructcor = []
 
 def h(p1, p2):
 	x1, y1 = p1
 	x2, y2 = p2
 	return abs(x1 - x2) + abs(y1 - y2)
 
-
 def reconstruct_path1(came_from, current, draw):
 	while current in came_from:
 		current = came_from[current]
 		current.make_path1()
+		pathcor1.append(current.get_pos())  # Store the path coordinates
 		draw()
 
 def reconstruct_path2(came_from, current, draw):
 	while current in came_from:
 		current = came_from[current]
 		current.make_path2()
+		pathcor2.append(current.get_pos())  # Store the path coordinates
 		draw()
 
 def reconstruct_path3(came_from, current, draw):
 	while current in came_from:
 		current = came_from[current]
 		current.make_path3()
+		pathcor3.append(current.get_pos())  # Store the path coordinates
 		draw()
 
+def determine_corners(path):
+    corners = []
+    for i in range(1,len(path)-1):
+        x1,y1 = path[i-1]
+        x2,y2 = path[i]
+        x3,y3 = path[i+1]
+        if abs(x1-x2)>0 and abs(y2-y3)>0 or abs(y1-y2)>0 and abs(x2-x3)>0:
+            corners.append((x2,y2))
+    return corners
 
 def algorithm(draw, grid, start, end1, end2, end3):
 	count = 0
@@ -158,22 +175,26 @@ def algorithm(draw, grid, start, end1, end2, end3):
 		if current == end1:
 			reconstruct_path1(came_from, end1, draw)
 			end1.make_end1()
-			#return True
+			print(pathcor1)
+			print('the coordinates of the corners of path 1 are: ', determine_corners(pathcor1))
 			quitter +=1
 
 		if current == end2:
 			reconstruct_path2(came_from, end2, draw)
 			end2.make_end2()
-			#return True
+			print(pathcor2)
+			print('the coordinates of the corners of path 2 are: ', determine_corners(pathcor2))
 			quitter += 1
 
 		if current == end3:
 			reconstruct_path3(came_from, end3, draw)
 			end3.make_end3()
-			#return True
+			print(pathcor3)
+			print('the coordinates of the corners of path 3 are: ', determine_corners(pathcor3))
 			quitter += 1
 
 		if quitter == 3:
+			print('the coordinates of the barriers are: ', obstructcor)
 			return True
 
 		for neighbor in current.neighbors:
@@ -195,7 +216,6 @@ def algorithm(draw, grid, start, end1, end2, end3):
 
 		if current != start:
 			current.make_closed()
-
 	return False
 
 
@@ -239,9 +259,8 @@ def get_clicked_pos(pos, rows, width):
 
 	return row, col
 
-
 def main(win, width):
-	ROWS = 50
+	ROWS = 40
 	grid = make_grid(ROWS, width)
 
 	start = None
@@ -279,6 +298,7 @@ def main(win, width):
 				elif spot != end1 and spot != end2 and spot != end3 and spot != start:
 					spot.make_barrier()
 
+
 			elif pygame.mouse.get_pressed()[2]: # RIGHT
 				pos = pygame.mouse.get_pos()
 				row, col = get_clicked_pos(pos, ROWS, width)
@@ -294,12 +314,25 @@ def main(win, width):
 					end3 = None
 
 			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_SPACE and start and end1 and end2 and end3:
+				if event.key == pygame.K_SPACE: # and start and end1 and end2 and end3
 					for row in grid:
 						for spot in row:
 							spot.update_neighbors(grid)
 
 					algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end1, end2, end3)
+
+				#MAKE GRIDS FOR BOTH PATH AND OBSTRUCTS
+				# OBSTRUCT:
+				obstructgrid = np.zeros((ROWS, ROWS))
+				for i in range(len(obstructcor)):
+					obstructgrid[obstructcor[i][1]][obstructcor[i][0]] = 1
+				print(obstructgrid)
+				pathgrid = np.zeros((ROWS, ROWS))
+				for i in range(len(obstructcor)):
+					pathgrid[pathcor1[i][1]][pathcor1[i][0]] = 1
+				print(pathgrid)
+
+
 
 				if event.key == pygame.K_c:
 					start = None
@@ -307,6 +340,10 @@ def main(win, width):
 					end2 = None
 					end3 = None
 					grid = make_grid(ROWS, width)
+
+	#make path grid
+
+	#make obstruct grid
 
 	pygame.quit()
 

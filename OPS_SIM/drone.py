@@ -9,7 +9,7 @@ from generalFunc import *
 from pathPlanning import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g, dt):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, S_blade, Ixx, Iyy, Izz, g):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -35,6 +35,7 @@ class drone:
         self.d = d
         self.k = k
         self.m = m
+        self.S_blade = S_blade
         self.Ixx = Ixx
         self.Iyy = Iyy
         self.Izz = Izz
@@ -57,7 +58,7 @@ class drone:
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
 
-
+        self.w_array = np.matrix([[0], [0], [0], [0]])
 
     def moveToWaypoint(self, curd, dmax, curdes, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -228,6 +229,18 @@ class drone:
 
             self.calcNextPos(self.waypoints[self.curdes][self.curway][0] + self.f * dx, self.waypoints[self.curdes][self.curway][1] + self.f * dy, self.waypoints[self.curdes][self.curway][2] + self.f * dz, dt)
 
+        # Calculating the drone power and updating battery
+        # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
+
+        P = 0
+
+        for w in self.w_array[0]:
+            T_prop = self.b * w**2
+            P_prop = T_prop**1.5 / (2 * 1.225 * self.S_blade)
+            P += P_prop
+
+        self.batLife -= P*dt
+
 
     def updateDrone(self, dt, litters, gs):
         # Function: calculate next position and change drone position
@@ -242,28 +255,18 @@ class drone:
             # self.goal[3] = hord_to_goal
 
             # print(self.state)
-
-            if self.state == 0:         # When drone is ready for new litter, choose which litter to pick and initiate flying
-                self.chooseLitter(litters)
-            elif self.state == 1:       # When the drone is on its way, move to the checkpoints and land near the litter
-                self.flying(dt)
-            elif self.state == 2:       # When the drone has landed, it drives to the litter
-                self.driveToLitter(dt)
-            elif self.state == 3:       # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
-                self.pickLitter(litters, gs)
-            elif self.state == 4:       # When the drone has reached the ground station, it drops the litter and checks battery life
-                self.dropLitter()
-            elif self.state == 5:       # When the drone is at the ground station and needs to charge. After, litter is chosen
-                self.charging()
-            elif self.state == 6:       # Drone is waiting at gs until more litter becomes available by reconnaisance
-                self.waiting()
-
-
-
-
-
-
-
-
-
-
+            match self.state:
+                case 0:         # When drone is ready for new litter, choose which litter to pick and initiate flying
+                    self.chooseLitter(litters)
+                case 1:       # When the drone is on its way, move to the checkpoints and land near the litter
+                    self.flying(dt)
+                case 2:       # When the drone has landed, it drives to the litter
+                    self.driveToLitter(dt)
+                case 3:       # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
+                    self.pickLitter(litters, gs)
+                case 4:       # When the drone has reached the ground station, it drops the litter and checks battery life
+                    self.dropLitter()
+                case 5:       # When the drone is at the ground station and needs to charge. After, litter is chosen
+                    self.charging()
+                case 6:       # Drone is waiting at gs until more litter becomes available by reconnaisance
+                    self.waiting()

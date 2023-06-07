@@ -4,10 +4,13 @@ import pytest
 import unittest
 from unittest.mock import MagicMock
 import numpy as np
+import random
+
+initial_state = random.getstate()
 
 litterInput = dict(
     amount=40,
-    littern=np.array([300, 200]),
+    littern=np.array([3, 2]),
     minvol=np.array([0, 20]),
     maxvol=np.array([90, 700]),
     seed=3955,
@@ -48,43 +51,65 @@ areaInput = dict(
     ysize=90,
 )
 
+
+# noinspection PyStatementEffect
 class test_setup(unittest.TestCase):
+
+    actual_drones, actual_litters = setup.setupClasses(litterInput, droneInput, groundStatInput, areaInput)
 
     def test_drone_setup(self):
 
-        actual_drones, actual_litters = setup.setupClasses(litterInput, droneInput, groundStatInput, areaInput)
-
         with self.subTest():
-            drone = actual_drones[0][0]
+            drone = self.actual_drones[0][0]
             actual_drone_properties = [drone.litdropt, drone.d, drone.Ixx]
             expected_drone_properties = [4, 0.05, 0.00430]
 
             np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
 
         with self.subTest():
-            drone = actual_drones[0][1]
+            drone = self.actual_drones[0][1]
             actual_drone_properties = [drone.vertvmax, drone.maxvol, drone.k]
             expected_drone_properties = [1, 450, 4e-8]
 
             np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
 
         with self.subTest():
-            drone = actual_drones[1][0]
-            actual_drone_properties = [drone.y, drone.power, drone.batLifeMax]
-            expected_drone_properties = [0, 450, 1610]
+            drone = self.actual_drones[1][0]
+            actual_drone_properties = [drone.waypoints[0][0][1], drone.power, drone.batLifeMax]
+            expected_drone_properties = [40, 450, 1610]
 
             np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
 
         with self.subTest():
-            drone = actual_drones[1][1]
+            drone = self.actual_drones[1][1]
             actual_drone_properties = [drone.drivevmax, drone.litdropt, drone.Izz]
             expected_drone_properties = [0.6, 5, 0.007]
 
             np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
 
         with self.subTest():
-            drone = actual_drones[2][0]
+            drone = self.actual_drones[2][0]
             actual_drone_properties = [drone.vmax, drone.d, drone.Iyy]
             expected_drone_properties = [7, 0.09, 0.00436]
 
             np.testing.assert_array_equal(expected_drone_properties, actual_drone_properties)
+
+    def test_litter_setup(self):
+        random.setstate(initial_state)
+        random.seed(3955)
+
+        for i in range(3):
+            with self.subTest():
+                litter = self.actual_litters[0][i]
+                actual_litter_properties = [litter.x, litter.y, litter.vol]
+                expected_litter_properties = [random.random() * 80, random.random() * 90, random.random() * 90]
+
+                np.testing.assert_array_equal(expected_litter_properties, actual_litter_properties)
+
+        for i in range(2):
+            with self.subTest():
+                litter = self.actual_litters[1][i]
+                actual_litter_properties = [litter.x, litter.y, litter.vol]
+                expected_litter_properties = [random.random() * 80, random.random() * 90, random.random() * 680 + 20]
+
+                np.testing.assert_array_equal(expected_litter_properties, actual_litter_properties)
