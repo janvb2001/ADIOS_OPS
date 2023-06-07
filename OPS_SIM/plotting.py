@@ -70,7 +70,7 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
                 litCoor[i][amAvail[i]][1] = li[i][l].y
                 litCoor[i][amAvail[i]][2] = li[i][l].z
                 amAvail[i] += 1
-    print("small litter: ", amAvail[0], " large litter: ", amAvail[1])
+    # print("small litter: ", amAvail[0], " large litter: ", amAvail[1])
 
     droCoor = np.array([np.zeros((len(dr[0]), 3)), np.zeros((len(dr[1]), 3))], dtype=object)
     for i in range(len(dr)):

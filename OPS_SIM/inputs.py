@@ -47,7 +47,12 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=1,         #runspeed compared to real-time
+    runspeed=100,         #runspeed compared to real-time
     maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=0.01,                   #time step taken at every loop instance
+    dt=1,                   #time step taken at every loop instance
+)
+
+obstDetecPar = dict(
+    gridsizex = 100,
+    gridsizey = 100,
 )

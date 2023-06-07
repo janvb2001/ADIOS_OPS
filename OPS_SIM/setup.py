@@ -4,7 +4,7 @@ import random as rnd
 from drone import *
 from litter import *
 
-def setupClasses(litterIn, droneIn, gsIn, areaIn):
+def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar):
     #drones = np.zeros(droneIn["dronetotal"])
     drones = []
     for i in range(len(droneIn["amountDrone"])):
