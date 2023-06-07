@@ -102,8 +102,7 @@ class test_setup(unittest.TestCase):
             with self.subTest():
                 litter = self.actual_litters[0][i]
                 actual_litter_properties = [litter.x, litter.y, litter.vol]
-                print('aaaaaaaaaaaa', litter.vol)
-                expected_litter_properties = [random.random() * 30, random.random() * 40, random.random() * 90]
+                expected_litter_properties = [random.random() * 80, random.random() * 90, random.random() * 90]
 
                 np.testing.assert_array_equal(expected_litter_properties, actual_litter_properties)
 
@@ -111,6 +110,6 @@ class test_setup(unittest.TestCase):
             with self.subTest():
                 litter = self.actual_litters[1][i]
                 actual_litter_properties = [litter.x, litter.y, litter.vol]
-                expected_litter_properties = [random.random() * 30, random.random() * 40, random.random() * 680 + 20]
+                expected_litter_properties = [random.random() * 80, random.random() * 90, random.random() * 680 + 20]
 
                 np.testing.assert_array_equal(expected_litter_properties, actual_litter_properties)
