@@ -62,7 +62,7 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
     # https://www.galaxysofts.com/new/python-creating-a-real-time-3d-plot/
 
     litCoor = np.array([np.zeros((len(li[0]), 3)), np.zeros((len(li[1]), 3))], dtype=object)
-    amAvail = [0,0,0]
+    amAvail = [0,0]
     for i in range(len(li)):
         for l in range(len(li[i])):
             if not li[i][l].picked:
@@ -70,6 +70,7 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
                 litCoor[i][amAvail[i]][1] = li[i][l].y
                 litCoor[i][amAvail[i]][2] = li[i][l].z
                 amAvail[i] += 1
+    print("small litter: ", amAvail[0], " large litter: ", amAvail[1])
 
     droCoor = np.array([np.zeros((len(dr[0]), 3)), np.zeros((len(dr[1]), 3))], dtype=object)
     for i in range(len(dr)):
