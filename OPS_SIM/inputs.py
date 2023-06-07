@@ -28,6 +28,9 @@ droneInput = dict(
     d=np.array([            0.1,    0.1]),
     k=np.array([            3e-8,   3e-8]),
     m=np.array([            1.2,    1.2]),
+
+    S_blade=np.array([      0.01,   0.01]),
+
     Ixx=np.array([          0.00433,    0.00433]),
     Iyy=np.array([          0.00433,    0.00433]),
     Izz=np.array([          0.008,      0.008]),

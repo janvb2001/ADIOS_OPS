@@ -9,7 +9,7 @@ from generalFunc import *
 from pathPlanning import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, Ixx, Iyy, Izz, g):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, S_blade, Ixx, Iyy, Izz, g):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -35,6 +35,7 @@ class drone:
         self.d = d
         self.k = k
         self.m = m
+        self.S_blade = S_blade
         self.Ixx = Ixx
         self.Iyy = Iyy
         self.Izz = Izz
@@ -224,6 +225,8 @@ class drone:
 
             self.calcNextPos(self.waypoints[self.curdes][self.curway][0] + self.f * dx, self.waypoints[self.curdes][self.curway][1] + self.f * dy, self.waypoints[self.curdes][self.curway][2] + self.f * dz, dt)
 
+        # Calculating the drone power and updating battery
+        # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
 
     def updateDrone(self, dt, litters, gs):
         # Function: calculate next position and change drone position
