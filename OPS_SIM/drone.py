@@ -6,10 +6,9 @@ import scipy.io as io
 
 from math import pi
 from generalFunc import *
-from AstarMultiplepoints import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, recharget, b, d, k, m, S_blade, Ixx, Iyy, Izz, g, dt):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, S_blade, Ixx, Iyy, Izz, g, dt):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -17,9 +16,16 @@ class drone:
         self.vmax = float(mv)
         self.drivevmax = float(drv)
         self.maxvol = float(maxvol)
-        self.power = float(p)
+        self.battothrusteff = float(btte)
+
+        self.Pwait = 0
+        self.powerflightcom = float(pfc)
+        self.powerobdetec = float(pob)
+        self.powergrabber = float(pgr)
+        self.powerdriving = float(pdr)
         self.batLifeMax = float(bat)
         self.batLife = float(bat)
+
         self.litpickt = float(litpickt)
         self.litdropt = float(litdropt)
         self.recharget = float(recharget)
@@ -98,14 +104,23 @@ class drone:
     def delaying(self, dt):
         # Function is called when waiting time >0. This function reduces the time left to wait and when it is
         # below 0, it sets it to 0 which lets the program continue
+
+        if self.Pwait == 0:
+            print("No power is used during waiting")
+        self.batLife -= self.Pwait * dt
+
         if self.waittogo - dt > 0:
             self.waittogo -= dt
         else:
             self.waittogo = 0
+            self.Pwait = 0
     def driveToLitter(self, dt):
         # Function is called each timestep to move the drone to the litter by driving. When goal is reached, state is
         # changed to 3 to pickup litter
         maxd = self.drivevmax * dt
+
+        P = self.powerobdetec + self.powerflightcom + self.powerdriving
+        self.batLife -= P * dt
 
         way = self.moveToWaypoint(0, maxd, self.curdes, self.curway)
         if way == -1:
@@ -119,6 +134,9 @@ class drone:
         # full, the drone flies back to ground station (1)
         litters[self.typeD][self.goal[3]].picked = True
         self.volume += litters[self.typeD][self.goal[3]].vol
+
+        P = self.powerobdetec + self.powerflightcom + self.powergrabber
+        self.Pwait = P
 
         self.waittogo = self.litpickt
         if len(self.waypoints) - 1 > self.curdes:
@@ -143,9 +161,13 @@ class drone:
     def dropLitter(self):
         # When the drone has reached the ground station for dropoff. A time delay is posed on the drone and the litter
         # volume set to 0. If the drone can continue, new litter is chosen (0). Otherwise the drone will recharge (5)
+
+        P = self.powerflightcom + self.powergrabber + self.powerobdetec
+        self.Pwait = P
+
         self.waittogo = self.litdropt
         self.volume = 0
-        if self.batLife > 100:
+        if self.batLife > 5000:
             self.state = 0
         else:
             # Battery must be replaced
@@ -163,10 +185,10 @@ class drone:
         if self.typeD == 0:
             n = 5
         else:
-            n=1
+            n = 1
         way = []
         liti = []
-        i=0
+        i = 0
         while len(way) < n:
             if litters[self.typeD][i].avail:
                 litters[self.typeD][i].avail = False
@@ -197,7 +219,6 @@ class drone:
         None
 
     def flying(self, dt):
-
 
         # print("X: ", self.X, ", waypoints: ", self.waypoints)
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
@@ -239,17 +260,21 @@ class drone:
 
         for w in self.w_array[:,0]:
             T_prop = self.b * w**2
-            P_prop = T_prop * np.sqrt(T_prop) / np.sqrt(2 * 1.225 * self.S_blade)
+            P_prop = T_prop * np.sqrt(T_prop) / np.sqrt(2 * 1.225 * self.S_blade) / self.battothrusteff
             P += P_prop
 
+        P += self.powerflightcom + self.powerobdetec
         delta_E = max(-P*dt, -50)
         self.batLife += delta_E
-        print(self.batLife)
+        # print(self.batLife)
 
     def updateDrone(self, dt, litters, gs):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
+        if self.batLife < 0:
+            print("ERROR: Battery is gone while operating")
+
         if self.waittogo > 0:
             self.delaying(dt)
         else:

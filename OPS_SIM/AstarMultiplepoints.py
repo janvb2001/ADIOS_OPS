@@ -109,11 +109,18 @@ def h(p1, p2):
 
 
 def reconstruct_path(came_from, current, draw):
-	if draw:
-		while current in came_from:
-			current = came_from[current]
-			current.make_path()
+	path = []
+
+	while current in came_from:
+		current = came_from[current]
+		current.make_path()
+
+		coor = (current.x, current.y)
+		path.append(coor)
+		if draw:
 			draw()
+
+	return path
 
 def algorithm(grid, start, end, draw = False):
 	count = 0
@@ -147,7 +154,9 @@ def algorithm(grid, start, end, draw = False):
 
 		for i in range(len(end)):
 			if current == end[i]:
-				reconstruct_path(came_from, end[i], draw)
+				path = reconstruct_path(came_from, end[i], draw)
+				print("mooie taak voor morgen:")
+				print(path)
 				end[i].make_end()
 				donecount += 1
 				print("donecount: ", donecount, "total litter: ", len(end))
@@ -226,6 +235,10 @@ def main(width, rows, obstruct, gs, litters, animation):
 	if animation:
 		win = pygame.display.set_mode((WIDTH, WIDTH))
 		pygame.display.set_caption("A* Path Finding Algorithm")
+		dr = lambda: draw(win, grid, ROWS, width)
+	else:
+		win = False
+		dr = False
 
 	ROWS = rows
 	grid = make_grid(ROWS, width)
@@ -254,20 +267,20 @@ def main(width, rows, obstruct, gs, litters, animation):
 		bar = spot
 		bar.make_barrier()
 
-	run = True
-	while run:
-		if win:
-			draw(win, grid, ROWS, width)
+	# run = True
+	# while run:
+	if win:
+		draw(win, grid, ROWS, width)
 
-		for row in grid:
-			for spot in row:
-				spot.update_neighbors(grid)
+	for row in grid:
+		for spot in row:
+			spot.update_neighbors(grid)
 
 
-		done = algorithm(grid, start, ends, draw=lambda: draw(win, grid, ROWS, width))
-		if done:
-			time.sleep(5)
-			run = False
+	done = algorithm(grid, start, ends, draw=dr)
+	# if done:
+	time.sleep(5)
+	run = False
 
 			# if event.key == pygame.K_c:
 			# 	start = None

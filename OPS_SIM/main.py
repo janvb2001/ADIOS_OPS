@@ -7,6 +7,8 @@ from inputs import *
 from setup import *
 from simulation import *
 
+
+
 # setup the ararys to keep track of the litters and drones
 drones, litters = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar)
 
