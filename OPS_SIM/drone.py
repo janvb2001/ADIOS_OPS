@@ -6,7 +6,7 @@ import scipy.io as io
 
 from math import pi
 from generalFunc import *
-from pathPlanning import *
+from AstarMultiplepoints import *
 
 class drone:
     def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, p, bat, litpickt, litdropt, b, d, k, m, S_blade, Ixx, Iyy, Izz, g):
