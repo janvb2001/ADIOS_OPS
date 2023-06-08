@@ -18,7 +18,17 @@ def get_polynomial_from_coeffs(p_array):
 
     return x_t
 
-# Takes the desired states at certain locations as input, gives a trajectory as a polynomial function of time as output
+# Creates a path through a number of waypoints, where position, velocity, acceleration and jerk can be chosen
+def create_trajectory(b_array, t_array):
+    for i in range(len(b_array) - 1):
+        print(b_array[i])
+        b = np.concatenate((b_array[i], b_array[i+1]))
+        b = np.transpose(np.matrix(b))
+
+        create_spline(b, t_array[i], t_array[i+1])
+
+
+# Takes the desired states at 2 end point as input, gives a trajectory as a polynomial function of time as output
 def create_spline(b, t0, t1):
 
     # x(t) = p7 * t^7 + p6 * t^6 + p5 * t^5 + p4 t^4 + p3 * t^3 + p2 * t^2 + p1 * t + p0
@@ -32,11 +42,19 @@ def create_spline(b, t0, t1):
     x_array = x_t(t_array)
 
     plt.plot(t_array, x_array)
-    plt.show()
 
 
-b = np.transpose(np.matrix([1, -1, 0, 0, 3, -1, 0, 0]))
-create_spline(b, 3, 4)
+# b = np.transpose(np.matrix([1, -1, 0, 0, 3, -1, 0, 0]))
+# create_spline(b, 3, 4)
 
+b_array = np.array([[1, 1, 0, 0],
+                    [2, 0, 0, 0],
+                    [1, -1, 0, 0],
+                    [3, 4, 0, 0]])
+t_array = np.array([1, 2, 3, 4])
+
+create_trajectory(b_array, t_array)
+
+plt.show()
 
 
