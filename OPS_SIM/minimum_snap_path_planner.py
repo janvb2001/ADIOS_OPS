@@ -23,8 +23,9 @@ def create_trajectory(b_array, t_array):
     for i in range(len(b_array) - 1):
         print(b_array[i])
         b = np.concatenate((b_array[i], b_array[i+1]))
-        b = np.transpose(np.matrix(b))
+        b = np.matrix(b)
 
+        print(b)
         create_spline(b, t_array[i], t_array[i+1])
 
 
@@ -36,21 +37,33 @@ def create_spline(b, t0, t1):
     A = get_A(t0, t1)
     p_array = np.linalg.inv(A) * b
 
-    x_t = get_polynomial_from_coeffs(p_array)
+    r_t = get_polynomial_from_coeffs(p_array)
 
     t_array = np.arange(t0, t1, 0.01)
-    x_array = x_t(t_array)
+    r_array = r_t(t_array)
 
-    plt.plot(t_array, x_array)
+    x = r_array[:,0]
+    y = r_array[:,1]
+    z = r_array[:,2]
+    yaw = r_array[:,3]
+
+    plt.plot(x, y)
 
 
 # b = np.transpose(np.matrix([1, -1, 0, 0, 3, -1, 0, 0]))
 # create_spline(b, 3, 4)
 
-b_array = np.array([[1, 1, 0, 0],
-                    [2, 0, 0, 0],
-                    [1, -1, 0, 0],
-                    [3, 4, 0, 0]])
+# b_array = np.array([[1, 1, 0, 0],
+#                     [2, 0, 0, 0],
+#                     [1, -1, 0, 0],
+#                     [3, 4, 0, 0]])
+# t_array = np.array([1, 2, 3, 4])
+
+b_array = np.array([[[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                    [[2, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                    [[1, 2, 2, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                    [[3, 0, 0, 0], [4, 2, 3, 0], [0, 0, 0, 0], [0, 0 ,0, 0]]])
+
 t_array = np.array([1, 2, 3, 4])
 
 create_trajectory(b_array, t_array)
