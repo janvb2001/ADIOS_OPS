@@ -41,4 +41,4 @@ def lineCrossCells(obst,begin,end):
 
 
 
-lineCrossCells(np.array([[False,False,True,True],[False,True,True,True],[False,True,False,True]]), [0,0],[4,3])
+#lineCrossCells(np.array([[False,False,True,True],[False,True,True,True],[False,True,False,True]]), [0,0],[4,3])
