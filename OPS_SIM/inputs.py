@@ -1,8 +1,8 @@
 import numpy as np
 
 litterInput = dict(
-    amount=1000,
-    littern=np.array([  500,    500]),
+    amount=10,
+    littern=np.array([  5,    5]),
     minvol=np.array([   0,      50]),
     maxvol=np.array([   50,     500]),
     seed=3953,
@@ -42,8 +42,8 @@ droneInput = dict(
 )
 
 groundStatInput = dict(
-    x=50,
-    y=50,
+    x=5,
+    y=5,
 )
 
 areaInput = dict(
@@ -57,7 +57,11 @@ simPar = dict(
     dt=0.1,                   #time step taken at every loop instance
 )
 
-obstDetecPar = dict(
-    gridsizex = 100,
-    gridsizey = 100,
+pathplanningPar = dict(
+    gridresolution=3,
+    animation=True,
+    obstacles=[[(10,10),(20,20)],[(40,15),(50,40)],[(50,60),(70,70)],[(20,80),(30,85)],[(5,10),(10,60)], [(90,0),(95,30)], [(17,10),(25,80)],[(60,30),(80,60)]],
+    obstacleHeight=10,
+    alpha_obst=0.8,
+    factor_animation=8,
 )
