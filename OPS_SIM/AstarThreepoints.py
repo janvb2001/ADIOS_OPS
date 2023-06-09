@@ -1,5 +1,5 @@
 import pygame
-import math
+from math import sqrt
 from queue import PriorityQueue
 import numpy as np
 
@@ -92,16 +92,28 @@ class Spot:
 	def update_neighbors(self, grid):
 		self.neighbors = []
 		if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
-			self.neighbors.append(grid[self.row + 1][self.col])
+			self.neighbors.append([grid[self.row + 1][self.col],0])
 
 		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
-			self.neighbors.append(grid[self.row - 1][self.col])
+			self.neighbors.append([grid[self.row - 1][self.col],0])
 
 		if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
-			self.neighbors.append(grid[self.row][self.col + 1])
+			self.neighbors.append([grid[self.row][self.col + 1],0])
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
-			self.neighbors.append(grid[self.row][self.col - 1])
+			self.neighbors.append([grid[self.row][self.col - 1],0])
+
+		if self.col > 0 and self.row > 0 and not grid[self.row - 1][self.col - 1].is_barrier(): # UPLEFT
+			self.neighbors.append([grid[self.row - 1][self.col - 1],1])
+
+		if self.col > 0 and self.row < self.total_rows - 1 and not grid[self.row + 1][self.col - 1].is_barrier(): # DOWNLEFT
+			self.neighbors.append([grid[self.row + 1][self.col - 1],1])
+
+		if self.row < self.total_rows - 1 and self.col < self.total_rows - 1 and not grid[self.row + 1][self.col + 1].is_barrier():  # DOWNRIGHT
+			self.neighbors.append([grid[self.row + 1][self.col + 1],1])
+
+		if self.row > 0 and self.col < self.total_rows -1 and not grid[self.row - 1][self.col + 1].is_barrier(): #UPRIGHT
+			self.neighbors.append([grid[self.row - 1][self.col +1 ],1])
 
 	def __lt__(self, other):
 		return False
@@ -198,8 +210,12 @@ def algorithm(draw, grid, start, end1, end2, end3):
 			return True
 
 		for neighbor in current.neighbors:
-			temp_g_score = g_score[current] + 1
+			if neighbor[1] == 0:
+				temp_g_score = g_score[current] + 1
+			elif neighbor[1] == 1:
+				temp_g_score = g_score[current] + sqrt(2)
 
+			neighbor = neighbor[0]
 			if temp_g_score < g_score[neighbor]:
 				came_from[neighbor] = current
 				g_score[neighbor] = temp_g_score
