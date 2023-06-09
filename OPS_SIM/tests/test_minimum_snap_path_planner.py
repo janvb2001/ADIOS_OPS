@@ -88,3 +88,23 @@ class test_minimum_snap_path_planner(unittest.TestCase):
             with self.subTest():
                 self.assertEqual(expected_vy, actual_vy)
 
+    def test_create_spline(self):
+
+        t0 = 0
+        t1 = 1
+        dt = 0.01
+
+        # Each sample: [x0, v0, a0, jerk0, x1, v1, a1, jerk1]
+        b = np.transpose(np.matrix([[0, 1, 0, 0, 1, 1, 0, 0],
+                                    [0, 0, 0, 0, 1, 0, 0, 0]]))
+
+        actual_r_array = minimum_snap_path_planner.create_spline(b, t0, t1, dt)
+
+        t = np.arange(t0, t1, dt)
+        expected_r_array = np.transpose([t,
+                                         -20*t**7 + 70*t**6 - 84*t**5 + 35*t**4])
+
+        np.testing.assert_array_almost_equal(expected_r_array, actual_r_array, decimal=6)
+
+    def test_create_trajectory(self):
+        pass
