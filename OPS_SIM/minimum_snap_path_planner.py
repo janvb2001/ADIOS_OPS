@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from directions import Directions
 
+### Use the function create_trajectory(a_star_position_arrray, nominal_speed, dt) ###
 
 def get_A(t0, t1):
     return np.array([[t0 ** 7, t0 ** 6, t0 ** 5, t0 ** 4, t0 ** 3, t0 ** 2, t0, 1],  # x at t1
@@ -21,7 +22,7 @@ def get_polynomial_from_coeffs(p_array):
     return x_t
 
 
-def create_setpoints_from_Astar(a_star_position_array, speed):
+def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
 
     b_list = []
     t_list = []
@@ -32,6 +33,7 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
     current_direction = get_wind_direction(x_array[0], x_array[1], y_array[0], y_array[1])
 
     t = 0
+    time_increment = 2 / nominal_speed # Was empirically found to work nicely
 
     for i in range(len(a_star_position_array)):
 
@@ -41,7 +43,7 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
         if i == 0:  # Initial point: path must start with 0 initial velocity, acceleration and jerk
             b_list.append([[x, y, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
             t_list.append(t)
-            t += 1
+            t += time_increment
 
             x_next = x_array[i + 1]
             y_next = y_array[i + 1]
@@ -51,7 +53,7 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
         elif i == len(a_star_position_array) - 1:  # Final point: path must end with 0 final velocity, acceleration and jerk
             b_list.append([[x, y, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
             t_list.append(t)
-            t += 1
+            t += time_increment
 
             x_prev = x_array[i - 1]
             y_prev = y_array[i - 1]
@@ -79,32 +81,32 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
                 x_setpoint = (x_prev + x) / 2
                 y_setpoint = (y_prev + y) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(previous_direction, direction_change, speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed)
 
                 b_list.append([[x_setpoint, y_setpoint, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, y_accel, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
-                t += 1
+                t += time_increment
 
             elif abs(direction_change) == 2 or abs(direction_change) == 6: # Making a 90 degree turn
 
-                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, speed)
-                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, speed)
+                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed)
+                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
 
                 b_list.append([[x_prev, y_prev, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
                 b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
-                t += 1
+                t += time_increment
                 t_list.append(t)
-                t += 1
+                t += time_increment
 
         elif next_direction % 2 == 1:  # Means shifting to travelling along +/- 45 degrees direction
             if abs(direction_change) == 1 or abs(direction_change) == 7:   # Making a 45 degree turn
                 x_setpoint = (x + x_next) / 2
                 y_setpoint = (y + y_next) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
 
                 b_list.append([[x_setpoint, y_setpoint, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
@@ -116,7 +118,7 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
                 x_setpoint_1 = (x_prev + x) / 2
                 y_setpoint_1 = (y_prev + y) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
 
                 b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
@@ -126,11 +128,10 @@ def create_setpoints_from_Astar(a_star_position_array, speed):
                 b_list.append([[x_setpoint_2, y_setpoint_2, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
-                t += 1
+                t += time_increment
                 t_list.append(t)
-                t += 1
+                t += time_increment
 
-    print('---------------------')
     return np.array(b_list), np.array(t_list)
 
 
@@ -166,7 +167,7 @@ def get_wind_direction(x_1, x_2, y_1, y_2):
 
 def get_velocity_and_accel_from_direction(direction, direction_change, speed):
 
-    block_size = 2
+    block_size = 1
 
     accel_magnitude_90_deg_turn = speed**2 / block_size
     accel_magnitude_45_deg_turn = speed**2 / (2 * block_size)
@@ -232,21 +233,9 @@ def get_velocity_and_accel_from_direction(direction, direction_change, speed):
 
     return x_speed, y_speed, x_accel, y_accel
 
-# Creates a path through a number of waypoints, where position, velocity, acceleration and jerk can be chosen
-def create_trajectory(b_array, t_array):
-    r_array = np.empty((0, 4))
-    for i in range(len(b_array) - 1):
-        b = np.concatenate((b_array[i], b_array[i + 1]))
-        b = np.matrix(b)
-
-        local_r_array = create_spline(b, t_array[i], t_array[i + 1])
-
-        r_array = np.concatenate((r_array, local_r_array))
-    return r_array
-
 
 # Takes the desired states at 2 end point as input, gives a trajectory as a polynomial function of time as output
-def create_spline(b, t0, t1):
+def create_spline(b, t0, t1, dt):
     # x(t) = p7 * t^7 + p6 * t^6 + p5 * t^5 + p4 t^4 + p3 * t^3 + p2 * t^2 + p1 * t + p0
 
     A = get_A(t0, t1)
@@ -254,14 +243,24 @@ def create_spline(b, t0, t1):
 
     r_t = get_polynomial_from_coeffs(p_array)
 
-    t_array = np.arange(t0, t1, 0.01)
+    t_array = np.arange(t0, t1, dt)
     r_array = r_t(t_array)
 
-    x = r_array[:, 0]
-    y = r_array[:, 1]
-    z = r_array[:, 2]
-    yaw = r_array[:, 3]
+    return r_array
 
+
+# Creates a path through a number of waypoints, where position, velocity, acceleration and jerk can be chosen
+def create_trajectory(a_star_position_array, nominal_speed, dt):
+    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, nominal_speed)
+
+    r_array = np.empty((0, 4))
+    for i in range(len(b_array) - 1):
+        b = np.concatenate((b_array[i], b_array[i + 1]))
+        b = np.matrix(b)
+
+        local_r_array = create_spline(b, t_array[i], t_array[i + 1], dt)
+
+        r_array = np.concatenate((r_array, local_r_array))
     return r_array
 
 
@@ -281,25 +280,26 @@ a_star_position_array = np.array([[3.5, 0.5],
                                       [3.5, 5.5],
                                       [4.5, 5.5]])
 
-b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 2)
+if __name__=="__main__":
+    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 10)
 
-x_points = b_array[:,0,0]
-y_points = b_array[:,0,1]
+    x_points = b_array[:,0,0]
+    y_points = b_array[:,0,1]
 
 
-vx = b_array[:,1,0]
-vy = b_array[:,1,1]
+    vx = b_array[:,1,0]
+    vy = b_array[:,1,1]
 
-ax = b_array[:,2,0]
-ay = b_array[:,2,1]
+    ax = b_array[:,2,0]
+    ay = b_array[:,2,1]
 
-for i in range(len(t_array)):
-    print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
+    for i in range(len(t_array)):
+        print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
 
-plt.plot(a_star_position_array[:,0], a_star_position_array[:,1], 'x', color='b', markersize='10')
-plt.plot(x_points, y_points, 'ro', color='red')
+    plt.plot(a_star_position_array[:,0], a_star_position_array[:,1], 'x', color='b', markersize='10')
+    plt.plot(x_points, y_points, 'ro', color='red')
 
-r_array = create_trajectory(b_array, t_array)
+    r_array = create_trajectory(a_star_position_array, 10, 0.01)
 
-plt.plot(r_array[:,0], r_array[:,1])
-plt.show()
+    plt.plot(r_array[:,0], r_array[:,1])
+    plt.show()
