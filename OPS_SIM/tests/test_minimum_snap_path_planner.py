@@ -83,7 +83,6 @@ class test_minimum_snap_path_planner(unittest.TestCase):
             actual_vx, actual_vy, ax, ay = minimum_snap_path_planner.get_velocity_and_accel_from_direction(direction, direction_change, speed, block_size)
             expected_vx, expected_vy = expected_velocity_array[i][0], expected_velocity_array[i][1]
 
-            print(expected_vx, actual_vx, expected_vy, actual_vy)
             with self.subTest():
                 self.assertEqual(expected_vx, actual_vx)
             with self.subTest():
