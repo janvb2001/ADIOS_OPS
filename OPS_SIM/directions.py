@@ -2,12 +2,12 @@ from enum import Enum
 
 
 class Directions(Enum):
-    NORTH = 1
-    NORTH_EAST = 2
-    EAST = 3
-    SOUTH_EAST = 4
-    SOUTH = 5
-    SOUTH_WEST= 6
-    WEST = 7
-    NORTH_WEST = 8
-    KANYE_WEST = 9
+    NORTH = 0
+    NORTH_EAST = 1
+    EAST = 2
+    SOUTH_EAST = 3
+    SOUTH = 4
+    SOUTH_WEST= 5
+    WEST = 6
+    NORTH_WEST = 7
+    KANYE_WEST = 8
