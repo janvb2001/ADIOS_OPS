@@ -297,7 +297,7 @@ if __name__=="__main__":
         print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
 
     plt.plot(a_star_position_array[:,0], a_star_position_array[:,1], 'x', color='b', markersize='10')
-    plt.plot(x_points, y_points, 'ro', color='red')
+    plt.plot(x_points, y_points, 'o', color='red')
 
     r_array = create_trajectory(a_star_position_array, 10, 0.01)
 
