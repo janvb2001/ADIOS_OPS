@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import time
 
-def plotSetup(li, dr, gr, area):
+def plotSetup(li, dr, gr, area, pp):
     # https://www.galaxysofts.com/new/python-creating-a-real-time-3d-plot/
 
     litCoor = np.array([np.zeros((len(li[0]),3)),np.zeros((len(li[1]),3))], dtype=object)
@@ -21,6 +21,11 @@ def plotSetup(li, dr, gr, area):
             droCoor[i][j][1] = dr[i][j].X[1]
             droCoor[i][j][2] = dr[i][j].X[2]
 
+    obst = pp["obstacles"]
+    h = pp["obstacleHeight"]
+    alpha = pp["alpha_obst"]
+    print(obst)
+
     map = plt.figure()
     map_ax = Axes3D(map)
 
@@ -28,6 +33,25 @@ def plotSetup(li, dr, gr, area):
     map_ax.set_xlim3d([0.0, area["xsize"]])
     map_ax.set_ylim3d([0.0, area["ysize"]])
     map_ax.set_zlim3d([0.0, 20.0])
+
+    cubes = []
+    # voxelarray =
+    for i in range(len(obst)):
+        x,y,z = np.indices((area["xsize"], area["ysize"], 20))
+        coor = [[-1, -1], [-1, -1]]
+        for j in range(len(obst[i])):
+            if obst[i][j][0] < coor[0][0] or coor[0][0] == -1:
+                coor[0][0] = obst[i][j][0]
+            if obst[i][j][0] > coor[0][1] or coor[0][1] == -1:
+                coor[0][1] = obst[i][j][0]
+            if obst[i][j][1] < coor[1][0] or coor[1][0] == -1:
+                coor[1][0] = obst[i][j][1]
+            if obst[i][j][1] > coor[1][1] or coor[1][1] == -1:
+                coor[1][1] = obst[i][j][1]
+
+        # cube = (x < coor[0][1]) & (x > coor[0][0]) & (y < coor[1][1]) & (y > coor[1][0]) & (z < h)
+        # cubes.append(cube)
+
 
     lismall, = map_ax.plot3D(litCoor[0][:, 0], litCoor[0][:, 1], litCoor[0][:, 2], color='lightskyblue', marker="o", markersize=2,linestyle="None")
     limed, = map_ax.plot3D(litCoor[1][:, 0], litCoor[1][:, 1], litCoor[1][:, 2], color='lightcoral', marker="o",markersize=2, linestyle="None")
