@@ -22,7 +22,7 @@ def get_polynomial_from_coeffs(p_array):
     return x_t
 
 
-def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
+def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size):
 
     b_list = []
     t_list = []
@@ -81,7 +81,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
                 x_setpoint = (x_prev + x) / 2
                 y_setpoint = (y_prev + y) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
 
                 b_list.append([[x_setpoint, y_setpoint, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, y_accel, 0, 0], [0, 0, 0, 0]])
 
@@ -90,8 +90,8 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
 
             elif abs(direction_change) == 2 or abs(direction_change) == 6: # Making a 90 degree turn
 
-                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed)
-                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
+                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
+                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
 
                 b_list.append([[x_prev, y_prev, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
                 b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
@@ -106,7 +106,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
                 x_setpoint = (x + x_next) / 2
                 y_setpoint = (y + y_next) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
 
                 b_list.append([[x_setpoint, y_setpoint, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
@@ -118,7 +118,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed):
                 x_setpoint_1 = (x_prev + x) / 2
                 y_setpoint_1 = (y_prev + y) / 2
 
-                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed)
+                x_speed, y_speed, x_accel, y_accel = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
 
                 b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
@@ -165,9 +165,7 @@ def get_wind_direction(x_1, x_2, y_1, y_2):
     return direction.value
 
 
-def get_velocity_and_accel_from_direction(direction, direction_change, speed):
-
-    block_size = 1
+def get_velocity_and_accel_from_direction(direction, direction_change, speed, block_size):
 
     accel_magnitude_90_deg_turn = speed**2 / block_size
     accel_magnitude_45_deg_turn = speed**2 / (2 * block_size)
@@ -250,8 +248,8 @@ def create_spline(b, t0, t1, dt):
 
 
 # Creates a path through a number of waypoints, where position, velocity, acceleration and jerk can be chosen
-def create_trajectory(a_star_position_array, nominal_speed, dt):
-    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, nominal_speed)
+def create_trajectory(a_star_position_array, nominal_speed, dt, block_size):
+    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size)
 
     r_array = np.empty((0, 4))
     for i in range(len(b_array) - 1):
@@ -264,12 +262,14 @@ def create_trajectory(a_star_position_array, nominal_speed, dt):
     return r_array
 
 
-# b_array = np.array([[[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], # [point, r/v/a/jerk, x/y/z/yaw]
-#                     [[2, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-#                     [[1, 2, 2, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-#                     [[3, 0, 0, 0], [4, 2, 3, 0], [0, 0, 0, 0], [0, 0 ,0, 0]]])
+if __name__=="__main__":
 
-a_star_position_array = np.array([[3.5, 0.5],
+    # b_array = np.array([[[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], # [point, r/v/a/jerk, x/y/z/yaw]
+    #                     [[2, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    #                     [[1, 2, 2, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    #                     [[3, 0, 0, 0], [4, 2, 3, 0], [0, 0, 0, 0], [0, 0 ,0, 0]]])
+
+    a_star_position_array = np.array([[3.5, 0.5],
                                       [2.5, 0.5],
                                       [1.5, 0.5],
                                       [0.5, 0.5],
@@ -280,8 +280,7 @@ a_star_position_array = np.array([[3.5, 0.5],
                                       [3.5, 5.5],
                                       [4.5, 5.5]])
 
-if __name__=="__main__":
-    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 10)
+    b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 10, 1)
 
     x_points = b_array[:,0,0]
     y_points = b_array[:,0,1]
@@ -296,10 +295,28 @@ if __name__=="__main__":
     for i in range(len(t_array)):
         print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
 
-    plt.plot(a_star_position_array[:,0], a_star_position_array[:,1], 'x', color='b', markersize='10')
+    ### PLOT GRIDLINES ###
+
+    for i in range(7):
+        plt.plot([0, 5], [i, i], color='black')
+
+    for i in range(6):
+        plt.plot([i, i], [0, 6], color='black')
+
+    for i in range(90):
+        plt.plot([i / 100 + 4.05, i / 100 + 4.05], [1 + 0.1, 2 - 0.1], color='red')
+        plt.plot([i / 100 + 3.05, i / 100 + 3.05], [1 + 0.1, 2 - 0.1], color='red')
+        plt.plot([i / 100 + 2.05, i / 100 + 2.05], [1 + 0.1, 2 - 0.1], color='red')
+        plt.plot([i / 100 + 1.05, i / 100 + 1.05], [1 + 0.1, 2 - 0.1], color='red')
+        plt.plot([i / 100 + 1.05, i / 100 + 1.05], [2 + 0.1, 3 - 0.1], color='red')
+
+        plt.plot([3.5, 4.5], [0.5, 5.5], 'o', markersize='20', color='black')
+    ######################
+
+    #plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'x', color='b', markersize='10')
     plt.plot(x_points, y_points, 'o', color='red')
 
-    r_array = create_trajectory(a_star_position_array, 10, 0.01)
+    r_array = create_trajectory(a_star_position_array, 10, 0.01, 1)
 
-    plt.plot(r_array[:,0], r_array[:,1])
+    plt.plot(r_array[:,0], r_array[:,1], color='green', markersize='5')
     plt.show()
