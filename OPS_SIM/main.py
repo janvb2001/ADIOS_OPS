@@ -13,7 +13,10 @@ from simulation import *
 drones, litters, grid = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar, pathplanningPar)
 
 # setup the 3D plot
-map_ax, lip0, lip1, drp0, drp1 = plotSetup(litters, drones, groundStatInput, areaInput, pathplanningPar)
+if simPar["plotOperation"]:
+    map_ax, lip0, lip1, drp0, drp1 = plotSetup(litters, drones, groundStatInput, areaInput, pathplanningPar)
+else:
+    map_ax = lip0 = lip1 = drp0 = drp1 = None
 
 # simulate
 simulate(drones, litters, groundStatInput, simPar, map_ax, lip0, lip1, drp0, drp1)

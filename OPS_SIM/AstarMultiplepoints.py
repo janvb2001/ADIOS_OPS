@@ -110,7 +110,7 @@ def reconstruct_path(came_from, current, draw):
 		current.make_path()
 
 		coor = (current.x, current.y)
-		path.append(coor)
+		path.insert(0,coor)
 		if draw:
 			draw()
 

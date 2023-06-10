@@ -268,12 +268,12 @@ class drone:
         self.batLife += delta_E
         # print(self.batLife)
 
-    def updateDrone(self, dt, litters, gs):
+    def updateDrone(self, dt, litters, gs, simPar):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
-        if self.batLife < 0:
-            print("ERROR: Battery is gone while operating")
+        if self.batLife < 0 and simPar["printErrors"]:
+            print("ERROR: Battery is gone while operating, drone:", self.typeD)
 
         if self.waittogo > 0:
             self.delaying(dt)
@@ -283,19 +283,33 @@ class drone:
             # self.waypoints[0][3] = hord_to_way
             # self.goal[3] = hord_to_goal
 
-            # print(self.state)
-            # match self.state:
-            if self.state == 0:         # When drone is ready for new litter, choose which litter to pick and initiate flying
-                self.chooseLitter(litters)
-            elif self.state == 1:       # When the drone is on its way, move to the checkpoints and land near the litter
-                self.flying(dt)
-            elif self.state == 2:       # When the drone has landed, it drives to the litter
-                self.driveToLitter(dt)
-            elif self.state == 3:       # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
-                self.pickLitter(litters, gs)
-            elif self.state == 4:       # When the drone has reached the ground station, it drops the litter and checks battery life
-                self.dropLitter()
-            elif self.state == 5:       # When the drone is at the ground station and needs to charge. After, litter is chosen
-                self.recharged()
-            elif self.state == 6:       # Drone is waiting at gs until more litter becomes available by reconnaisance
-                self.waiting()
+            # if self.state == 0:         # When drone is ready for new litter, choose which litter to pick and initiate flying
+            #     self.chooseLitter(litters)
+            # elif self.state == 1:       # When the drone is on its way, move to the checkpoints and land near the litter
+            #     self.flying(dt)
+            # elif self.state == 2:       # When the drone has landed, it drives to the litter
+            #     self.driveToLitter(dt)
+            # elif self.state == 3:       # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
+            #     self.pickLitter(litters, gs)
+            # elif self.state == 4:       # When the drone has reached the ground station, it drops the litter and checks battery life
+            #     self.dropLitter()
+            # elif self.state == 5:       # When the drone is at the ground station and needs to charge. After, litter is chosen
+            #     self.recharged()
+            # elif self.state == 6:       # Drone is waiting at gs until more litter becomes available by reconnaisance
+            #     self.waiting()
+
+            match self.state:
+                case 0:  # When drone is ready for new litter, choose which litter to pick and initiate flying
+                    self.chooseLitter(litters)
+                case 1:  # When the drone is on its way, move to the checkpoints and land near the litter
+                    self.flying(dt)
+                case 2:  # When the drone has landed, it drives to the litter
+                    self.driveToLitter(dt)
+                case 3:  # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
+                    self.pickLitter(litters, gs)
+                case 4:  # When the drone has reached the ground station, it drops the litter and checks battery life
+                    self.dropLitter()
+                case 5:  # When the drone is at the ground station and needs to charge. After, litter is chosen
+                    self.recharged()
+                case 6:  # Drone is waiting at gs until more litter becomes available by reconnaisance
+                    self.waiting()

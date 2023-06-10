@@ -8,8 +8,8 @@ def dist3d(x1, x2, y1, y2, z1, z2):
     return sqrt((x2-x1)**2+(y2-y1)**2+(z2-z1)**2)
 
 def indicesSquareCorners(square, gap, length, width, grid):
-    rowsx = width // gap
-    rowsy = length // gap
+    # rowsx = width // gap
+    # rowsy = length // gap
 
     ind = [[-1,-1],[-1,-1]]
     for coor in square:

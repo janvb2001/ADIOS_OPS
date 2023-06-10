@@ -2,7 +2,7 @@ import numpy as np
 
 litterInput = dict(
     amount=10,
-    littern=np.array([  5,    5]),
+    littern=np.array([  500,    500]),
     minvol=np.array([   0,      50]),
     maxvol=np.array([   50,     500]),
     seed=3953,
@@ -53,15 +53,18 @@ areaInput = dict(
 
 simPar = dict(
     runspeed=10,         #runspeed compared to real-time
-    maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=0.1,                   #time step taken at every loop instance
+    maxplotloops=10000,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    dt=0.5,                   #time step taken at every loop instance
+    plotOperation=True,
+    printErrors=False,
 )
 
 pathplanningPar = dict(
-    gridresolution=3,
-    animation=True,
+    gridresolution=1,
+    buildingresolution=10,
+    animation=False,
     obstacles=[[(10,10),(20,20)],[(40,15),(50,40)],[(50,60),(70,70)],[(20,80),(30,85)],[(5,10),(10,60)], [(90,0),(95,30)], [(17,10),(25,80)],[(60,30),(80,60)]],
-    obstacleHeight=10,
-    alpha_obst=0.8,
+    obstacleHeight=8,
+    alpha_obst=0.4,
     factor_animation=8,
 )
