@@ -1,7 +1,7 @@
 import pytest
 import unittest
 import numpy as np
-
+from unittest.mock import patch
 import matplotlib.pyplot as plt
 
 import minimum_snap_path_planner
@@ -136,5 +136,17 @@ class test_minimum_snap_path_planner(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(expected_r_array, actual_r_array, decimal=6)
 
-    # def test_create_trajectory(self):
-    #     a_star_position_array = np.array([[0, 0, 0, 0], [1, 1, 1, 1]])
+    def test_create_trajectory(self):
+
+        with patch('minimum_snap_path_planner.create_spline', return_value=np.zeros((300, 4))):
+            a_star_position_array = np.array([[0, 0],
+                                              [0, 1],
+                                              [0, 2],
+                                              [1, 2]])
+
+            actual_r_array = minimum_snap_path_planner.create_trajectory(a_star_position_array, 10, 0.1, 1)
+            expected_r_array = np.zeros((900, 4))
+
+            np.testing.assert_array_equal(expected_r_array.shape, actual_r_array.shape)
+
+
