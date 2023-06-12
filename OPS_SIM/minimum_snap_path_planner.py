@@ -88,6 +88,14 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 t_list.append(t)
                 t += time_increment
 
+                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, 0,
+                                                                                                   nominal_speed,
+                                                                                                   block_size)
+                b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+
+                t_list.append(t)
+                t += time_increment
+
             elif abs(direction_change) == 2 or abs(direction_change) == 6: # Making a 90 degree turn
 
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
@@ -106,17 +114,9 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_setpoint_1 = (x + x_next) / 2
                 y_setpoint_1 = (y + y_next) / 2
 
-
-
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
-                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, 0, nominal_speed, block_size)
 
                 b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
-
-                t_list.append(t)
-                t += time_increment
-
-                b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
