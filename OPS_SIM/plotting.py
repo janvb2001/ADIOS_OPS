@@ -127,14 +127,14 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
             droCoor[i][j][1] = dr[i][j].X[1]
             droCoor[i][j][2] = dr[i][j].X[2]
 
-    for i in range(len(dr)):
-        for j in range(len(dr[i])):
-            if len(dr[i][j].r_array) > 0:
-                x = dr[i][j].r_array[:,0]
-                y = dr[i][j].r_array[:, 1]
-                z = np.zeros(len(x))
-                map_ax.plot3D(x,y,z, color="g", marker=".")
-                print("test")
+    # for i in range(len(dr)):
+    #     for j in range(len(dr[i])):
+    #         if len(dr[i][j].r_array) > 0:
+    #             x = dr[i][j].r_array[:,0]
+    #             y = dr[i][j].r_array[:, 1]
+    #             z = np.zeros(len(x))
+    #             map_ax.plot3D(x,y,z, color="g", marker=".")
+    #             print("test")
 
     updateplot(lismall, litCoor, 0, amAvail[0])
     updateplot(limed, litCoor, 1, amAvail[1])

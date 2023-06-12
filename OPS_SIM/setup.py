@@ -86,8 +86,23 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
     notfound = 0
     for i in range(len(litters)):
         for j in range(len(litters[i])):
-            if len(litters[i][j].path) == 0:
+            li = litters[i][j]
+            if len(li.path) == 0:
                 notfound += 1
+            d = dist2d(li.x, li.path[-1][0], li.y, li.path[-1][1])
+            if d > litterIn["drivingdist"][i]:
+                li.landingPos = np.array(li.path[-1])
+            else:
+                dx = li.path[-2][0] - li.path[-1][0]
+                dy = li.path[-2][1] - li.path[-1][1]
+                dd = dist2d(li.path[-2][0], li.path[-1][0], li.path[-2][1], li.path[-1][1])
+
+                landx = dx * (litterIn["drivingdist"][i] - d)/dd + li.path[-1][0]
+                landy = dy * (litterIn["drivingdist"][i] - d) / dd + li.path[-1][1]
+
+                li.path[-1] = [landx, landy]
+                li.landingPos = np.array([landx, landy, 0, 0])
+
     print("Litters no route found: ", notfound)
 
     return drones, litters, grid
