@@ -74,7 +74,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
         current_direction = next_direction
 
         if direction_change == 0:  # Not changing direction: Speed is increased to straight_speed
-            pass
+            t += time_increment
 
         elif next_direction % 2 == 0:  # Means shifting to travelling along +/- 90 degrees direction
             if abs(direction_change) == 1 or abs(direction_change) == 7: # Making a 45 degree turn
@@ -111,7 +111,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 b_list.append([[x_setpoint, y_setpoint, 0, 0], [x_speed, y_speed, 0, 0], [x_accel, x_accel, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
-                t += 1
+                t += time_increment
 
             elif abs(direction_change) == 2 or abs(direction_change) == 6: # Making a 90 degree turn
 
