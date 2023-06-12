@@ -2,6 +2,8 @@ import pytest
 import unittest
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 import minimum_snap_path_planner
 
 class test_minimum_snap_path_planner(unittest.TestCase):
@@ -30,8 +32,36 @@ class test_minimum_snap_path_planner(unittest.TestCase):
 
         np.testing.assert_array_equal(expected_output, actual_output)
 
+    # Only tests the positional and velocity aspects, not acceleration
     def test_create_setpoints_from_A_star(self):
-        pass
+        a_star_position_array = np.array([[0, 0],
+                                          [0, 1],
+                                          [0, 2],
+                                          [0, 3],
+                                          [1, 3],
+                                          [2, 3],
+                                          [3, 4],
+                                          [4, 5]])
+
+        expected_b_array = np.array([[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                                     [[0, 2, 0, 0], [0, 10, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                                     [[1, 3, 0, 0], [10, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                                     [[2.5, 3.5, 0, 0], [0.5*np.sqrt(2)*10, 0.5*np.sqrt(2)*10, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                                     [[4, 5, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]])
+
+        # x_b = expected_b_array[:,0,0]
+        # y_b = expected_b_array[:,0,1]
+        #
+        # plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1])
+        # plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'o', color='blue')
+        #
+        # plt.plot(x_b, y_b, 'x', color='red')
+        # plt.show()
+
+        actual_b_array, actual_t_array = minimum_snap_path_planner.create_setpoints_from_Astar(a_star_position_array, 10, 1)
+
+        # Only checks position and velocity
+        np.testing.assert_array_equal(expected_b_array[:,0:2], actual_b_array[:,0:2])
 
     def test_get_wind_direction(self):
         positions_array = np.array([[[0, 1], [0, 2]],
@@ -106,5 +136,5 @@ class test_minimum_snap_path_planner(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(expected_r_array, actual_r_array, decimal=6)
 
-    def test_create_trajectory(self):
-        pass
+    # def test_create_trajectory(self):
+    #     a_star_position_array = np.array([[0, 0, 0, 0], [1, 1, 1, 1]])
