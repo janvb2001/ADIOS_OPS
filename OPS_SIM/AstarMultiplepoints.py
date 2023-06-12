@@ -4,6 +4,7 @@ import math
 from queue import PriorityQueue
 import time
 from math import sqrt
+import numpy as np
 
 from generalFunc import *
 
@@ -109,8 +110,8 @@ def reconstruct_path(came_from, current, draw):
 		current = came_from[current]
 		current.make_path()
 
-		coor = (current.x, current.y)
-		path.append(coor)
+		coor = [current.x, current.y]
+		path.insert(0,coor)
 		if draw:
 			draw()
 
@@ -156,7 +157,7 @@ def algorithm(grid, start, end, litters, draw = False):
 
 				# litters[end[i].litteri][end[i].ind].path = path
 				for j in range(len(end[i].litteri)):
-					litters[end[i].litteri[j][0]][end[i].litteri[j][1]].path = path
+					litters[end[i].litteri[j][0]][end[i].litteri[j][1]].path = np.array(path)
 
 				end[i].make_end()
 				donecount += 1

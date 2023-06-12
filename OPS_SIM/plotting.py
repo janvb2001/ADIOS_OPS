@@ -23,11 +23,18 @@ def plotSetup(li, dr, gr, area, pp):
 
     obst = pp["obstacles"]
     h = pp["obstacleHeight"]
-    alpha = pp["alpha_obst"]
-    print(obst)
+    alphab = pp["alpha_obst"]
+
+    # map = plt.figure()
+    # map_ax = Axes3D(map)
 
     map = plt.figure()
-    map_ax = Axes3D(map)
+    map_ax = plt.axes(projection='3d')
+
+    map_ax.set_xlabel("x")
+    map_ax.set_ylabel("y")
+    map_ax.set_zlabel("z")
+    map_ax.set_aspect("equal")
 
     # # # Setting the axes properties
     map_ax.set_xlim3d([0.0, area["xsize"]])
@@ -36,10 +43,20 @@ def plotSetup(li, dr, gr, area, pp):
 
     cubes = []
     # voxelarray =
+    # data = np.full((area["xsize"], area["ysize"], 20), False)
+
+    buildres = pp["buildingresolution"]
+    z = np.full((buildres, buildres), h)
+    z[:1] = 0
+    z[-1:] = 0
+    z[:,:1] = 0
+    z[:, -1:] = 0
+
     for i in range(len(obst)):
-        x,y,z = np.indices((area["xsize"], area["ysize"], 20))
-        coor = [[-1, -1], [-1, -1]]
+        coor = [[-1, -1], [-1, -1], [0,h]]
+        coors = [[],[],[]]
         for j in range(len(obst[i])):
+            # x, y, z = np.indices((area["xsize"], area["ysize"], 20))
             if obst[i][j][0] < coor[0][0] or coor[0][0] == -1:
                 coor[0][0] = obst[i][j][0]
             if obst[i][j][0] > coor[0][1] or coor[0][1] == -1:
@@ -49,9 +66,16 @@ def plotSetup(li, dr, gr, area, pp):
             if obst[i][j][1] > coor[1][1] or coor[1][1] == -1:
                 coor[1][1] = obst[i][j][1]
 
-        # cube = (x < coor[0][1]) & (x > coor[0][0]) & (y < coor[1][1]) & (y > coor[1][0]) & (z < h)
-        # cubes.append(cube)
+            x = np.outer(np.linspace(coor[0][0], coor[0][1], buildres), np.ones(buildres))
+            y = np.outer(np.ones(buildres), np.linspace(coor[1][0], coor[1][1], buildres))
+            map_ax.plot_surface(x, y, z, color=(0,0,0), alpha=alphab, edgecolor=None)
 
+    for i in range(len(li)):
+        for l in range(len(li[i])):
+            x = li[i][l].path[:,0]
+            y = li[i][l].path[:, 1]
+            z = np.zeros(len(x))
+            map_ax.plot3D(x,y,z, color="r", marker="s", markersize="1")
 
     lismall, = map_ax.plot3D(litCoor[0][:, 0], litCoor[0][:, 1], litCoor[0][:, 2], color='lightskyblue', marker="o", markersize=2,linestyle="None")
     limed, = map_ax.plot3D(litCoor[1][:, 0], litCoor[1][:, 1], litCoor[1][:, 2], color='lightcoral', marker="o",markersize=2, linestyle="None")
@@ -103,6 +127,15 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
             droCoor[i][j][1] = dr[i][j].X[1]
             droCoor[i][j][2] = dr[i][j].X[2]
 
+    for i in range(len(dr)):
+        for j in range(len(dr[i])):
+            if len(dr[i][j].r_array) > 0:
+                x = dr[i][j].r_array[:,0]
+                y = dr[i][j].r_array[:, 1]
+                z = np.zeros(len(x))
+                map_ax.plot3D(x,y,z, color="g", marker=".")
+                print("test")
+
     updateplot(lismall, litCoor, 0, amAvail[0])
     updateplot(limed, litCoor, 1, amAvail[1])
 
@@ -112,3 +145,5 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
     plt.draw()
     plt.show(block=False)
     plt.pause(0.001)
+
+    return amAvail
