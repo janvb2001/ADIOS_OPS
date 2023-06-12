@@ -33,7 +33,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
     current_direction = get_wind_direction(x_array[0], x_array[1], y_array[0], y_array[1])
 
     t = 0
-    time_increment = 2 / nominal_speed # Was empirically found to work nicely
+    time_increment = 20 / nominal_speed # Was empirically found to work nicely
 
     for i in range(len(a_star_position_array)):
 

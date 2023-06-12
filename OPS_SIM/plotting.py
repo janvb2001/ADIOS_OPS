@@ -70,6 +70,12 @@ def plotSetup(li, dr, gr, area, pp):
             y = np.outer(np.ones(buildres), np.linspace(coor[1][0], coor[1][1], buildres))
             map_ax.plot_surface(x, y, z, color=(0,0,0), alpha=alphab, edgecolor=None)
 
+    for i in range(len(li)):
+        for l in range(len(li[i])):
+            x = li[i][l].path[:,0]
+            y = li[i][l].path[:, 1]
+            z = np.zeros(len(x))
+            map_ax.plot3D(x,y,z, color="r", marker="s", markersize="1")
 
     lismall, = map_ax.plot3D(litCoor[0][:, 0], litCoor[0][:, 1], litCoor[0][:, 2], color='lightskyblue', marker="o", markersize=2,linestyle="None")
     limed, = map_ax.plot3D(litCoor[1][:, 0], litCoor[1][:, 1], litCoor[1][:, 2], color='lightcoral', marker="o",markersize=2, linestyle="None")
@@ -120,6 +126,15 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
             droCoor[i][j][0] = dr[i][j].X[0]
             droCoor[i][j][1] = dr[i][j].X[1]
             droCoor[i][j][2] = dr[i][j].X[2]
+
+    for i in range(len(dr)):
+        for j in range(len(dr[i])):
+            if len(dr[i][j].r_array) > 0:
+                x = dr[i][j].r_array[:,0]
+                y = dr[i][j].r_array[:, 1]
+                z = np.zeros(len(x))
+                map_ax.plot3D(x,y,z, color="g", marker=".")
+                print("test")
 
     updateplot(lismall, litCoor, 0, amAvail[0])
     updateplot(limed, litCoor, 1, amAvail[1])

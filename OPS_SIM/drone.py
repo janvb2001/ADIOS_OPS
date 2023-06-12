@@ -6,6 +6,7 @@ import scipy.io as io
 
 from math import pi
 from generalFunc import *
+from minimum_snap_path_planner import *
 
 class drone:
     def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, S_blade, Ixx, Iyy, Izz, g, dt):
@@ -61,7 +62,10 @@ class drone:
         self.curdes = 0
         self.curway = 0
         self.litteri = []
+        self.r_array = []
 
+        self.tb = 0
+        self.flyingindex = 0
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
 
@@ -178,12 +182,12 @@ class drone:
         # restored to max. Afterwards, new litter is chosen (0)
         self.batLife = self.batLifeMax
         self.state = 0
-    def chooseLitter(self, litters):
+    def chooseLitter(self, litters, gap, dt, t):
         # The path planning function is called with the relevant drone information to decide which litter will be
         # picked by the drone. When this is successfull, drone will start flying (1). When no litter is available, state
         # is set to 6 to wait for more litter to be discovered.
         if self.typeD == 0:
-            n = 5
+            n = 1
         else:
             n = 1
         way = []
@@ -208,6 +212,13 @@ class drone:
                 break
         if self.state != 6:
             self.state = 1
+            self.tb = t
+            self.flyingindex=0
+
+            # Make function for pathplanning
+            self.r_array = np.array(create_trajectory(litters[self.typeD][liti[0]].path, 5, dt, gap))
+
+
         self.flyingto = 0
         self.waypoints = way
         self.litteri = liti
@@ -218,22 +229,41 @@ class drone:
         # waiting
         None
 
-    def flying(self, dt):
+    def flying(self, dt, t):
 
         # print("X: ", self.X, ", waypoints: ", self.waypoints)
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.current][0], " desy: ", self.waypoints[self.current][1], " desz: ", self.waypoints[self.current][2])
         # print(d)
-        if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1.1:
-            # Waypoint reached
-            self.curway += 1
-            self.calcNextPos(self.waypoints[self.curdes][self.curway][0], self.waypoints[self.curdes][self.curway][1], self.waypoints[self.curdes][self.curway][2], dt)
-        elif d < 0.2:
-            #Not yet able to get closer than 0.8
-            #Destination reached
-
+        # if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1.1:
+        #     # Waypoint reached
+        #     self.curway += 1
+        #     self.calcNextPos(self.waypoints[self.curdes][self.curway][0], self.waypoints[self.curdes][self.curway][1], self.waypoints[self.curdes][self.curway][2], dt)
+        # elif d < 0.2:
+        #     #Not yet able to get closer than 0.8
+        #     #Destination reached
+        #
+        #     if self.flyingto == 0:
+        #         # Drone has landed and now drives to litter
+        #         self.X[2] = 0.
+        #         self.state = 2
+        #         # self.waypoints = [[self.goal]]
+        #     elif self.flyingto == 1:
+        #         # Drone has reached the groundstation
+        #         self.state = 4
+        # else:
+        #     # Drone is on route
+        #     if self.curway + 1 < len(self.waypoints):
+        #         dx = self.waypoints[self.curdes][self.curway][0] - self.waypoints[self.curdes][self.curway - 1][0]
+        #         dy = self.waypoints[self.curdes][self.curway][1] - self.waypoints[self.curdes][self.curway - 1][1]
+        #         dz = self.waypoints[self.curdes][self.curway][2] - self.waypoints[self.curdes][self.curway - 1][2]
+        #     else:
+        #         dx = 0
+        #         dy = 0
+        #         dz = 0
+        if d < 0.2:
             if self.flyingto == 0:
-                # Drone has landed and now drives to litter
+            # Drone has landed and now drives to litter
                 self.X[2] = 0.
                 self.state = 2
                 # self.waypoints = [[self.goal]]
@@ -241,17 +271,22 @@ class drone:
                 # Drone has reached the groundstation
                 self.state = 4
         else:
-            # Drone is on route
-            if self.curway + 1 < len(self.waypoints):
-                dx = self.waypoints[self.curdes][self.curway][0] - self.waypoints[self.curdes][self.curway - 1][0]
-                dy = self.waypoints[self.curdes][self.curway][1] - self.waypoints[self.curdes][self.curway - 1][1]
-                dz = self.waypoints[self.curdes][self.curway][2] - self.waypoints[self.curdes][self.curway - 1][2]
-            else:
-                dx = 0
-                dy = 0
-                dz = 0
 
-            self.calcNextPos(self.waypoints[self.curdes][self.curway][0] + self.f * dx, self.waypoints[self.curdes][self.curway][1] + self.f * dy, self.waypoints[self.curdes][self.curway][2] + self.f * dz, dt)
+            self.calcNextPos(self.r_array[self.flyingindex][0], self.r_array[self.flyingindex][1], self.r_array[self.flyingindex][2], dt)
+            if self.flyingindex + 1 < len(self.r_array):
+                self.flyingindex += 1
+
+
+
+
+
+
+
+
+
+
+
+
 
         # Calculating the drone power and updating battery
         # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
@@ -268,7 +303,7 @@ class drone:
         self.batLife += delta_E
         # print(self.batLife)
 
-    def updateDrone(self, dt, litters, gs, simPar):
+    def updateDrone(self, dt, t, litters, gap, gs, simPar):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
@@ -300,9 +335,9 @@ class drone:
 
             match self.state:
                 case 0:  # When drone is ready for new litter, choose which litter to pick and initiate flying
-                    self.chooseLitter(litters)
+                    self.chooseLitter(litters, gap, dt, t)
                 case 1:  # When the drone is on its way, move to the checkpoints and land near the litter
-                    self.flying(dt)
+                    self.flying(dt, t)
                 case 2:  # When the drone has landed, it drives to the litter
                     self.driveToLitter(dt)
                 case 3:  # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying

@@ -19,7 +19,7 @@ else:
     map_ax = lip0 = lip1 = drp0 = drp1 = None
 
 # simulate
-simulate(drones, litters, groundStatInput, simPar, map_ax, lip0, lip1, drp0, drp1)
+simulate(drones, litters, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1)
 
 
 
