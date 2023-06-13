@@ -85,7 +85,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_dir(previous_direction, direction_change, nominal_speed, block_size)
                 yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_2], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -250,7 +250,13 @@ def get_velocity_and_accel_from_dir(direction, direction_change, speed, block_si
 
 
 def get_yaw_angle_from_velocity(x_speed, y_speed):
-    arg = np.arctan(y_speed / x_speed)
+
+    arg = 0
+    if not x_speed == 0:
+        arg = np.arctan(y_speed / x_speed)
+
+    if y_speed < 0:
+        arg += np.deg2rad(180)
 
     return arg
 
