@@ -115,6 +115,7 @@ class Spot:
 		if self.row > 0 and self.col < self.total_rows -1 and not grid[self.row - 1][self.col + 1].is_barrier(): #UPRIGHT
 			self.neighbors.append([grid[self.row - 1][self.col +1 ],1])
 
+
 	def __lt__(self, other):
 		return False
 
@@ -219,9 +220,21 @@ def algorithm(draw, grid, start, end1, end2, end3):
 			if temp_g_score < g_score[neighbor]:
 				came_from[neighbor] = current
 				g_score[neighbor] = temp_g_score
-				f1_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end1.get_pos())
-				f2_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end2.get_pos())
-				f3_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end3.get_pos())
+
+				if neighbor.row < neighbor.total_rows - 1 and neighbor.row > 0 and neighbor.col < neighbor.total_rows - 1 and neighbor.col > 0 and (grid[neighbor.row + 1][neighbor.col].is_barrier() or grid[neighbor.row - 1][neighbor.col].is_barrier() or grid[neighbor.row][neighbor.col + 1].is_barrier() or grid[neighbor.row][neighbor.col - 1].is_barrier()):
+					f1_score[neighbor] = temp_g_score + 1000 + h(neighbor.get_pos(), end1.get_pos())
+					f2_score[neighbor] = temp_g_score + 1000 + h(neighbor.get_pos(), end2.get_pos())
+					f3_score[neighbor] = temp_g_score + 1000 + h(neighbor.get_pos(), end3.get_pos())
+
+				#This one did not check for boundaries
+				# if grid[neighbor.row + 1][neighbor.col].is_barrier() or grid[neighbor.row - 1][neighbor.col].is_barrier() or grid[neighbor.row][neighbor.col + 1].is_barrier() or grid[neighbor.row][neighbor.col - 1].is_barrier():
+				# 	f1_score[neighbor] = temp_g_score + 100 + h(neighbor.get_pos(), end1.get_pos())
+
+				else:
+					f1_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end1.get_pos())
+					f2_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end2.get_pos())
+					f3_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end3.get_pos())
+
 				if neighbor not in open_set_hash:
 					count += 1
 					open_set.put((f1_score[neighbor]+f2_score[neighbor]+f3_score[neighbor], count, neighbor))
