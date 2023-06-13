@@ -33,7 +33,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
     current_direction = get_wind_direction(x_array[0], x_array[1], y_array[0], y_array[1])
 
     t = 0
-    time_increment = 20 / nominal_speed # Was empirically found to work nicely
+    time_increment = 1 / nominal_speed # Was empirically found to work nicely
 
     for i in range(len(a_star_position_array)):
 
@@ -82,16 +82,17 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 y_setpoint_1 = (y_prev + y) / 2
 
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
+                yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_2], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
 
-                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, 0,
-                                                                                                   nominal_speed,
-                                                                                                   block_size)
-                b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, 0, nominal_speed, block_size)
+                yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
+
+                b_list.append([[x_next, y_next, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -101,8 +102,11 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
                 x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
 
-                b_list.append([[x_prev, y_prev, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
-                b_list.append([[x_next, y_next, 0, 0], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
+                yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
+                yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
+
+                b_list.append([[x_prev, y_prev, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_next, y_next, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -115,8 +119,9 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 y_setpoint_1 = (y + y_next) / 2
 
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
+                yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -126,14 +131,17 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_setpoint_1 = (x_prev + x) / 2
                 y_setpoint_1 = (y_prev + y) / 2
 
-                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
-
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
-
                 x_setpoint_2 = (x + x_next) / 2
                 y_setpoint_2 = (y + y_next) / 2
 
-                b_list.append([[x_setpoint_2, y_setpoint_2, 0, 0], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
+                x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_direction(previous_direction, direction_change, nominal_speed, block_size)
+                x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_direction(next_direction, direction_change, nominal_speed, block_size)
+
+                yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
+                yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
+
+                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_2, y_setpoint_2, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, x_accel_2, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -240,6 +248,12 @@ def get_velocity_and_accel_from_direction(direction, direction_change, speed, bl
     return x_speed, y_speed, x_accel, y_accel
 
 
+def get_yaw_angle_from_velocity(x_speed, y_speed):
+    arg = np.arctan(y_speed / x_speed)
+
+    return arg
+
+
 # Takes the desired states at 2 end point as input, gives a trajectory as a polynomial function of time as output
 def create_spline(b, t0, t1, dt):
     # x(t) = p7 * t^7 + p6 * t^6 + p5 * t^5 + p4 t^4 + p3 * t^3 + p2 * t^2 + p1 * t + p0
@@ -324,7 +338,7 @@ if __name__=="__main__":
     #plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'x', color='b', markersize='10')
     plt.plot(x_points, y_points, 'o', color='red')
 
-    r_array = create_trajectory(a_star_position_array, 10, 0.01, 1)
+    r_array = create_trajectory(a_star_position_array, 1, 0.01, 1)
 
     plt.plot(r_array[:,0], r_array[:,1], color='green', markersize='5')
     plt.show()
