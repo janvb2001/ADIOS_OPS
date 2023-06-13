@@ -88,7 +88,7 @@ class test_minimum_snap_path_planner(unittest.TestCase):
                 self.assertEqual(expected_directions_values[i], actual_direction)
 
     # Acceleration not tested yet as it is subject to tweaking
-    def test_get_velocity_and_accel_from_direction(self):
+    def test_get_velocity_and_accel_from_dir(self):
 
         # has the shape [[direction, direction_change, speed, block_size] ... []]
         parameter_array = np.array([[0, 0, 10, 1],
@@ -110,7 +110,7 @@ class test_minimum_snap_path_planner(unittest.TestCase):
             speed = parameter_array[i][2]
             block_size = parameter_array[i][3]
 
-            actual_vx, actual_vy, ax, ay = minimum_snap_path_planner.get_velocity_and_accel_from_direction(direction, direction_change, speed, block_size)
+            actual_vx, actual_vy, ax, ay = minimum_snap_path_planner.get_velocity_and_accel_from_dir(direction, direction_change, speed, block_size)
             expected_vx, expected_vy = expected_velocity_array[i][0], expected_velocity_array[i][1]
 
             with self.subTest():
