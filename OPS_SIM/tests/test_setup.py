@@ -1,8 +1,11 @@
 import setup as setup
+import generalFunc
 
 import pytest
 import unittest
 from unittest.mock import MagicMock
+from unittest.mock import patch
+
 import numpy as np
 import random
 
@@ -13,6 +16,7 @@ litterInput = dict(
     littern=np.array([3, 2]),
     minvol=np.array([0, 20]),
     maxvol=np.array([90, 700]),
+    drivingdist=np.array([1,    1]),
     seed=3955,
 )
 
@@ -26,16 +30,25 @@ droneInput = dict(
 
     maxvol=np.array([450, 0, 0]),  # Max volume for litter storage [cm^3]
 
-    power=np.array([500, 450, 400]),  # Power usage of the drone [W]
+    battothrusteff=np.array([0.5, 0.3, 0.4]),
+    powerFlightcom=np.array([8, 9, 10]),  # Power usage of the drone [W]
+    powergrabbing=np.array([23, 25, 31]),  # Power usage of the drone [W]
+    powerDriving=np.array([24, 26, 19]),
+    powerObjDetec=np.array([18, 19, 21]),
+
     maxBat=np.array([1600, 1610, 1605]),  # Battery storage [kJ]
 
     litPickT=np.array([9, 8, 7]),  # How long it takes to pick litter when on top [s]
     litDropT=np.array([4, 5, 6]),  # How long it takes to drop litter when at gs [s]
+    recharget=np.array([160, 170, 150]),
 
     b=np.array([2e-6, 3e-6, 4e-6]),
     d=np.array([0.05, 0.08, 0.09]),
     k=np.array([4e-8, 3e-8, 2e-8]),
     m=np.array([1.1, 1.3, 1.5]),
+
+    S_blade=np.array([0.03, 0.02, 0.04]),
+
     Ixx=np.array([0.00430, 0.00431, 0.00432]),
     Iyy=np.array([0.00434, 0.00435, 0.00436]),
     Izz=np.array([0.006, 0.007, 0.009]),
@@ -51,11 +64,33 @@ areaInput = dict(
     ysize=90,
 )
 
+simPar = dict(
+    runspeed=0.7,         #runspeed compared to real-time
+    maxplotloops=80,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    dt=0.01,                   #time step taken at every loop instance
+    plotOperation=True,
+    printErrors=False,
+)
 
+pathplanningPar = dict(
+    gridresolution=2,
+    buildingresolution=5,
+    animation=False,
+    obstacles=[[(15,10),(20,20)],[(30,15),(50,43)],[(50,60),(70,70)],[(21,96),(30,85)],[(5,10),(10,60)], [(90,0),(95,30)], [(17,10),(25,80)],[(60,30),(80,60)]],
+    obstacleHeight=7,
+    alpha_obst=0.5,
+    factor_animation=7,
+)
 # noinspection PyStatementEffect
 class test_setup(unittest.TestCase):
 
-    actual_drones, actual_litters = setup.setupClasses(litterInput, droneInput, groundStatInput, areaInput)
+    with patch("generalFunc.indicesSquareCorners", side_effect=print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")):
+        actual_drones, actual_litters = setup.setupClasses(litterInput,
+                                                           droneInput,
+                                                           groundStatInput,
+                                                           areaInput,
+                                                           simPar,
+                                                           pathplanningPar)
 
     def test_drone_setup(self):
 
