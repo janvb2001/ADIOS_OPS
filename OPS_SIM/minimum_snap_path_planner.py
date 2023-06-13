@@ -23,6 +23,7 @@ def get_polynomial_from_coeffs(p_array):
 
 
 def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size):
+    h = 5
 
     b_list = []
     t_list = []
@@ -85,7 +86,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_dir(previous_direction, direction_change, nominal_speed, block_size)
                 yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, h, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -93,7 +94,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_speed_2, y_speed_2, x_accel_2, y_accel_2 = get_velocity_and_accel_from_dir(next_direction, 0, nominal_speed, block_size)
                 yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
 
-                b_list.append([[x_next, y_next, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_next, y_next, h, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -106,8 +107,8 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
                 yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
 
-                b_list.append([[x_prev, y_prev, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
-                b_list.append([[x_next, y_next, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_prev, y_prev, h, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, y_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_next, y_next, h, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, y_accel_2, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -122,7 +123,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 x_speed_1, y_speed_1, x_accel_1, y_accel_1 = get_velocity_and_accel_from_dir(next_direction, direction_change, nominal_speed, block_size)
                 yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, h, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
@@ -141,8 +142,8 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
                 yaw_angle_1 = get_yaw_angle_from_velocity(x_speed_1, y_speed_1)
                 yaw_angle_2 = get_yaw_angle_from_velocity(x_speed_2, y_speed_2)
 
-                b_list.append([[x_setpoint_1, y_setpoint_1, 0, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
-                b_list.append([[x_setpoint_2, y_setpoint_2, 0, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, x_accel_2, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_1, y_setpoint_1, h, yaw_angle_1], [x_speed_1, y_speed_1, 0, 0], [x_accel_1, x_accel_1, 0, 0], [0, 0, 0, 0]])
+                b_list.append([[x_setpoint_2, y_setpoint_2, h, yaw_angle_2], [x_speed_2, y_speed_2, 0, 0], [x_accel_2, x_accel_2, 0, 0], [0, 0, 0, 0]])
 
                 t_list.append(t)
                 t += time_increment
