@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from plotting import *
 
 
-def simulate(drones, litters, groundstat, simPar, pathpp, map_ax, lip0, lip1, drp0, drp1):
+def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, lip1, drp0, drp1, litterin):
     t = 0.
     dt = simPar["dt"]
     tstart = time.time()
@@ -17,7 +17,7 @@ def simulate(drones, litters, groundstat, simPar, pathpp, map_ax, lip0, lip1, dr
             for drtype in range(len(drones)):
                 # dcount = 0
                 for d in drones[drtype]:
-                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar)
+                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar, grid, litterin["drivingdist"][drtype])
                     # print("drtype: ", drtype, "dcount: ", dcount, ", t: ", t, ", x: ", d.x, ', y: ', d.y, ", z: ", d.z)
                     # dcount += 1
 

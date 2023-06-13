@@ -30,5 +30,48 @@ def indicesSquareCorners(square, gap, length, width, grid):
         for j in range(ind[1][0],ind[1][1]):
             grid[i][j].make_barrier()
 
+def checkLineOnGrid(grid, start, end, res):
+    # Return whether line crosses grid barrier
+    x1 = start[0]
+    x2 = end[0]
+    y1 = start[1]
+    y2 = end[1]
+
+    if x1 == x2:
+        # Vertical line
+        None
+    elif y1 == y2:
+        # Horizontal line
+        None
+    else:
+        # Diagonal line
+        a = (y2 - y1) / (x2 - x1)
+        b = y1 - a * x1
+
+        xs = np.arange(x1, x2, res/10)
+        ys = a * xs + b
+
+        rows = ys // res
+        cols = xs // res
+
+        rows = rows.astype(int)
+        cols = cols.astype(int)
+
+        barCrossed = False
+        for i in range(len(rows)):
+            if rows[i] >= len(grid):
+                rows[i] -= 1
+            if cols[i] >= len(grid[rows[i]]):
+                cols[i] -= 1
+
+            if grid[rows[i]][cols[i]].color == (0, 0, 0):
+                barCrossed = True
+                break
+
+        return barCrossed
+
+
+
+
 
 

@@ -9,7 +9,7 @@ from generalFunc import *
 from minimum_snap_path_planner import *
 
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, S_blade, Ixx, Iyy, Izz, g, dt):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, S_blade, Ixx, Iyy, Izz, g, dt, batThresh):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -26,6 +26,7 @@ class drone:
         self.powerdriving = float(pdr)
         self.batLifeMax = float(bat)
         self.batLife = float(bat)
+        self.batThresh = float(batThresh)
 
         self.litpickt = float(litpickt)
         self.litdropt = float(litdropt)
@@ -143,25 +144,38 @@ class drone:
         self.Pwait = P
 
         self.waittogo = self.litpickt
-        if len(self.waypoints) - 1 > self.curdes:
-            #Drone moves to next litterpiece
-            self.goal = [litters[self.typeD][self.litteri[self.curdes+1]].x, litters[self.typeD][self.litteri[self.curdes+1]].y, litters[self.typeD][self.litteri[self.curdes+1]].z, self.litteri[self.curdes+1]]
-            self.curdes += 1
-            self.curway = 0
-            d = dist2d(self.X[0], self.goal[0], self.X[1], self.goal[1])
-            if d > 10:
-                self.state = 1
-            else:
-                self.state = 2
-
-        else:
-            #Drone flies back to van for dropoff
-            self.waypoints = [[[gs["x"], gs["y"], 0 , -1]]]
+        # if len(self.waypoints) - 1 > self.curdes:
+        #     #Drone moves to next litterpiece
+        #     self.goal = [litters[self.typeD][self.litteri[self.curdes+1]].x, litters[self.typeD][self.litteri[self.curdes+1]].y, litters[self.typeD][self.litteri[self.curdes+1]].z, self.litteri[self.curdes+1]]
+        #     self.curdes += 1
+        #     self.curway = 0
+        #     d = dist2d(self.X[0], self.goal[0], self.X[1], self.goal[1])
+        #     if d > 10:
+        #         self.state = 1
+        #     else:
+        #         self.state = 2
+        #
+        # else:
+        #     #Drone flies back to van for dropoff
+        #     self.waypoints = [[[gs["x"], gs["y"], 0 , -1]]]
+        #     self.goal = self.waypoints[0][0]
+        #     self.flyingindex = len(self.r_array)-1
+        #     self.flyingto = 1
+        #     self.state = 1
+        #     self.curdes = 0
+        #     self.curway = 0
+        if self.batLife < self.batThresh or self.volume > self.maxvol:
+            # Drone goes back to van
+            self.waypoints = [[[gs["x"], gs["y"], 0, -1]]]
             self.goal = self.waypoints[0][0]
+            self.flyingindex = len(self.r_array_back)-1
             self.flyingto = 1
             self.state = 1
             self.curdes = 0
             self.curway = 0
+        else:
+            # Drone continues to next litter
+            self.state = 0
     def dropLitter(self):
         # When the drone has reached the ground station for dropoff. A time delay is posed on the drone and the litter
         # volume set to 0. If the drone can continue, new litter is chosen (0). Otherwise the drone will recharge (5)
@@ -182,48 +196,158 @@ class drone:
         # restored to max. Afterwards, new litter is chosen (0)
         self.batLife = self.batLifeMax
         self.state = 0
-    def chooseLitter(self, litters, gap, dt, t):
+    def chooseLitter(self, litters, gap, dt, t, grid, drivingd, gs):
         # The path planning function is called with the relevant drone information to decide which litter will be
         # picked by the drone. When this is successfull, drone will start flying (1). When no litter is available, state
         # is set to 6 to wait for more litter to be discovered.
-        if self.typeD == 0:
-            n = 1
-        else:
-            n = 1
+
+        # if self.typeD == 0:
+        #     n = 1
+        # else:
+        #     n = 1
+        li = litters[self.typeD]
         way = []
         liti = []
+
         i = 0
-        while len(way) < n:
-            if litters[self.typeD][i].avail:
-                litters[self.typeD][i].avail = False
+        if self.volume == 0:
+            while len(way) == 0:
+                if litters[self.typeD][i].avail:
+                    litters[self.typeD][i].avail = False
 
-                coorend = [litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
-                coormiddle = [(coorend[0]+self.X[0][0])/2, (coorend[1]+self.X[1][0])/2, 10, i]
-                way.append([litters[self.typeD][i].landingPos])
-                liti.append(i)
-                if len(way) == 1:
-                    self.goal = [litters[self.typeD][i].x, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
-                i += 1
-            elif i+1 < len(litters[self.typeD]):
-                i += 1
+                    coorend = [litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
+                    coormiddle = [(coorend[0]+self.X[0][0])/2, (coorend[1]+self.X[1][0])/2, 10, i]
+                    way.append([litters[self.typeD][i].landingPos])
+                    liti.append(i)
+                    if len(way) == 1:
+                        self.goal = [litters[self.typeD][i].x, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
+                    i += 1
+                elif i+1 < len(litters[self.typeD]):
+                    i += 1
+                else:
+                    if len(way) == 0:
+                        self.state = 6
+                    break
+            if self.state != 6:
+                self.state = 1
+                self.tb = t
+                self.flyingindex = 0
+
+                # Make function for pathplanning
+                self.r_array = np.array(create_trajectory(litters[self.typeD][liti[0]].path, 5, dt, gap))
+                self.r_array = np.vstack([self.r_array, litters[self.typeD][liti[0]].landingPos])
+
+                print(self.r_array)
+
+                self.r_array_back = self.r_array
+
+        else:
+            di = np.zeros(len(li))
+            for i in range(len(li)):
+                if li[i].avail:
+                    di[i] = dist2d(li[i].x, self.X[0], li[i].y, self.X[1])
+                else:
+                    di[i] = -1
+            disorted = np.sort(di)
+
+            i = 0
+            chosen = False
+            litFound = True
+            while not chosen:
+                if i == len(li):
+                    litFound = False
+                    chosen = True
+                elif disorted[i] <= 0:
+                    i += 1
+                else:
+                    mini = np.where(di == disorted[i])[0][0]
+
+                    obstCrossed = checkLineOnGrid(grid, (float(self.X[0]), float(self.X[1])), (li[mini].x, li[mini].y), gap)
+                    if not obstCrossed:
+                        chosen = True
+                    else:
+                        i += 1
+
+            if litFound:
+                # Make function for pathplanning
+                # self.r_array = np.array(create_trajectory(litters[self.typeD][mini].path, 5, dt, gap))
+                # self.r_array = np.vstack([self.r_array, litters[self.typeD][mini].landingPos])
+
+                li[mini].avail = False
+                self.goal = [li[mini].x, li[mini].y, 0, mini]
+
+                self.liti = [mini]
+
+                if disorted[i] < 10:
+                    # Drive
+                    self.state = 2
+                    way = [[[li[mini].x, li[mini].y, 0, mini]]]
+
+                else:
+                    self.state = 1
+                    self.tb = t
+                    self.flyingindex = 0
+
+                    d = disorted[i]
+                    f = drivingd / d
+                    x_land = float(f * (self.X[0]-li[mini].x) + li[mini].x)
+                    y_land = float(f * (self.X[1] - li[mini].y) + li[mini].y)
+
+                    newpath = np.array([[float(self.X[0]), float(self.X[1])], [x_land, y_land]])
+
+                    way = [[[x_land, y_land, 0, mini]]]
+                    self.goal = [li[mini].x, li[mini].y, 0, mini]
+
+                    # Make function for pathplanning
+                    self.r_array = np.array(create_trajectory(newpath, 5, dt, gap))
+                    self.r_array = np.vstack([self.r_array, [x_land, y_land, 0, 0]])
+
+                    self.r_array_back = np.array(create_trajectory(litters[self.typeD][mini].path, 5, dt, gap))
             else:
-                if len(way) == 0:
-                    self.state = 6
-                break
-        if self.state != 6:
-            self.state = 1
-            self.tb = t
-            self.flyingindex=0
+                # Drone goes back to van
+                self.waypoints = [[[gs["x"], gs["y"], 0, -1]]]
+                self.goal = self.waypoints[0][0]
+                self.flyingindex = len(self.r_array_back) - 1
+                self.flyingto = 1
+                self.state = 1
+                self.curdes = 0
+                self.curway = 0
 
-            # Make function for pathplanning
-            self.r_array = np.array(create_trajectory(litters[self.typeD][liti[0]].path, 5, dt, gap))
-            self.r_array = np.vstack([self.r_array, litters[self.typeD][liti[0]].landingPos])
-            # self.r_array = np.append(self.r_array, litters[self.typeD][i].landingPos, axis=1)
+
 
 
         self.flyingto = 0
         self.waypoints = way
         self.litteri = liti
+
+        # while len(way) < n:
+        #     if litters[self.typeD][i].avail:
+        #         litters[self.typeD][i].avail = False
+        #
+        #         coorend = [litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
+        #         coormiddle = [(coorend[0]+self.X[0][0])/2, (coorend[1]+self.X[1][0])/2, 10, i]
+        #         way.append([litters[self.typeD][i].landingPos])
+        #         liti.append(i)
+        #         if len(way) == 1:
+        #             self.goal = [litters[self.typeD][i].x, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
+        #         i += 1
+        #     elif i+1 < len(litters[self.typeD]):
+        #         i += 1
+        #     else:
+        #         if len(way) == 0:
+        #             self.state = 6
+        #         break
+        # if self.state != 6:
+        #     self.state = 1
+        #     self.tb = t
+        #     self.flyingindex = 0
+        #
+        #     # Make function for pathplanning
+        #     self.r_array = np.array(create_trajectory(litters[self.typeD][liti[0]].path, 5, dt, gap))
+        #     self.r_array = np.vstack([self.r_array, litters[self.typeD][liti[0]].landingPos])
+
+
+
 
 
     def waiting(self):
@@ -232,11 +356,11 @@ class drone:
         None
 
     def flying(self, dt, t):
-
+        # print("state: ", self.state,  "way: ", self.waypoints)
         # print("X: ", self.X, ", waypoints: ", self.waypoints)
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.curdes][0], " desy: ", self.waypoints[self.curdes][1], " desz: ", self.waypoints[self.curdes][2])
-        print(d)
+        # print(d)
         # if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1.1:
         #     # Waypoint reached
         #     self.curway += 1
@@ -263,7 +387,7 @@ class drone:
         #         dx = 0
         #         dy = 0
         #         dz = 0
-        if d < 0.2:
+        if d < 0.1:
             if self.flyingto == 0:
             # Drone has landed and now drives to litter
                 self.X[2] = 0.
@@ -273,10 +397,14 @@ class drone:
                 # Drone has reached the groundstation
                 self.state = 4
         else:
-
-            self.calcNextPos(self.r_array[self.flyingindex][0], self.r_array[self.flyingindex][1], self.r_array[self.flyingindex][2], dt)
-            if self.flyingindex + 1 < len(self.r_array):
-                self.flyingindex += 1
+            if self.goal[3] == -1:
+                self.calcNextPos(self.r_array_back[self.flyingindex][0], self.r_array_back[self.flyingindex][1], self.r_array_back[self.flyingindex][2], dt)
+                if self.flyingindex - 1 >= 0:
+                    self.flyingindex -= 1
+            else:
+                self.calcNextPos(self.r_array[self.flyingindex][0], self.r_array[self.flyingindex][1], self.r_array[self.flyingindex][2], dt)
+                if self.flyingindex + 1 < len(self.r_array):
+                    self.flyingindex += 1
 
 
 
@@ -305,16 +433,20 @@ class drone:
         self.batLife += delta_E
         # print(self.batLife)
 
-    def updateDrone(self, dt, t, litters, gap, gs, simPar):
+    def updateDrone(self, dt, t, litters, gap, gs, simPar, grid, drivingd):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
         if self.batLife < 0 and simPar["printErrors"]:
             print("ERROR: Battery is gone while operating, drone:", self.typeD)
 
+        # print(self.state)
+        # print(self.goal)
+
         if self.waittogo > 0:
             self.delaying(dt)
         else:
+
             # hord_to_way = dist2d(self.X[0], self.waypoints[0][0], self.X[1], self.waypoints[0][1])
             # hord_to_goal = dist2d(self.X[0], self.goal[0], self.X[1], self.goal[1])
             # self.waypoints[0][3] = hord_to_way
@@ -337,7 +469,7 @@ class drone:
 
             match self.state:
                 case 0:  # When drone is ready for new litter, choose which litter to pick and initiate flying
-                    self.chooseLitter(litters, gap, dt, t)
+                    self.chooseLitter(litters, gap, dt, t, grid, drivingd, gs)
                 case 1:  # When the drone is on its way, move to the checkpoints and land near the litter
                     self.flying(dt, t)
                 case 2:  # When the drone has landed, it drives to the litter

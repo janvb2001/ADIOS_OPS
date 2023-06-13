@@ -176,6 +176,8 @@ def algorithm(grid, start, end, litters, draw = False):
 				came_from[neighbor] = current
 				g_score[neighbor] = temp_g_score
 				f_score[neighbor] = temp_g_score
+				if neighbor.row < neighbor.total_rowsy - 1 and neighbor.row > 0 and neighbor.col < neighbor.total_rowsx - 1 and neighbor.col > 0 and (grid[neighbor.row + 1][neighbor.col].is_barrier() or grid[neighbor.row - 1][neighbor.col].is_barrier() or grid[neighbor.row][neighbor.col + 1].is_barrier() or grid[neighbor.row][neighbor.col - 1].is_barrier()):
+					f_score[neighbor] = temp_g_score + 10000 # h(neighbor.get_pos(), end.get_pos())
 				# for i in range(len(end)):
 				# 	f_score[neighbor] += h(neighbor.get_pos(), end[i].get_pos())
 				if neighbor not in open_set_hash:

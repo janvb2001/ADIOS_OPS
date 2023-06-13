@@ -2,16 +2,16 @@ import numpy as np
 
 litterInput = dict(
     amount=10,
-    littern=np.array([  10,    10]),
+    littern=np.array([  100,    100]),
     minvol=np.array([   0,      50]),
     maxvol=np.array([   50,     500]),
-    drivingdist=np.array([3,    3]),
+    drivingdist=np.array([3.,    3.]),
     seed=3953,
 )
 
 droneInput = dict(
     dronetotal=10,                                          # total amount of drones
-    amountDrone=np.array([  1,      1]),            # n of drones per type
+    amountDrone=np.array([  5,      5]),            # n of drones per type
 
     vertv=np.array([        3,      3]),            # Max vertical v per type [m/s]
     maxv=np.array([         10,     10]),           # Max horizontal v per type [m/s]
@@ -19,6 +19,7 @@ droneInput = dict(
 
     maxvol=np.array([       500,    0]),            # Max volume for litter storage [cm^3]
 
+    batThreshhold=np.array([5000,   5000]),
     battothrusteff=np.array([       0.7,    0.7]),
     powerFlightcom=np.array([       10,    10]),          # Power usage of the drone [W]
     powergrabbing=np.array([        30,    30]),          # Power usage of the drone [W]
@@ -53,7 +54,7 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=0.5,         #runspeed compared to real-time
+    runspeed=3,         #runspeed compared to real-time
     maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
     dt=0.1,                   #time step taken at every loop instance
     plotOperation=True,

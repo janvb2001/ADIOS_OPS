@@ -20,7 +20,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
                       droneIn["maxBat"][i], droneIn["litPickT"][i],
                       droneIn["litDropT"][i], droneIn["recharget"][i], droneIn["b"][i], droneIn["d"][i],
                       droneIn["k"][i], droneIn["m"][i], droneIn["S_blade"][i],
-                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"])
+                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"], droneIn["batThreshhold"][i])
 
             drones[i].append(d)
 
@@ -86,16 +86,33 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
     notfound = 0
     for i in range(len(litters)):
         for j in range(len(litters[i])):
+            if i == 1 and j == 35:
+                print("stop")
+
+
             li = litters[i][j]
-            if len(li.path) == 0:
+            if len(li.path) == 1:
                 notfound += 1
+
             d = dist2d(li.x, li.path[-1][0], li.y, li.path[-1][1])
             if d > litterIn["drivingdist"][i]:
                 li.landingPos = np.array(li.path[-1])
             else:
-                dx = li.path[-2][0] - li.path[-1][0]
-                dy = li.path[-2][1] - li.path[-1][1]
-                dd = dist2d(li.path[-2][0], li.path[-1][0], li.path[-2][1], li.path[-1][1])
+                if len(li.path) == 2:
+                    dx = gs["x"] - li.path[-1][0]
+                    dy = gs["y"] - li.path[-1][1]
+
+                    dd = dist2d(gs["x"], li.path[-1][0], gs["y"], li.path[-1][1])
+                elif len(li.path) == 1:
+                    dx = gs["x"] - li.x
+                    dy = gs["y"] - li.y
+
+                    dd = dist2d(gs["x"], li.x, gs["y"], li.y)
+                else:
+                    dx = li.path[-2][0] - li.path[-1][0]
+                    dy = li.path[-2][1] - li.path[-1][1]
+
+                    dd = dist2d(li.path[-2][0], li.path[-1][0], li.path[-2][1], li.path[-1][1])
 
                 landx = dx * (litterIn["drivingdist"][i] - d)/dd + li.path[-1][0]
                 landy = dy * (litterIn["drivingdist"][i] - d) / dd + li.path[-1][1]
