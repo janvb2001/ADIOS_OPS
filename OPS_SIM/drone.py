@@ -199,7 +199,7 @@ class drone:
 
                 coorend = [litters[self.typeD][i].x - 3, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
                 coormiddle = [(coorend[0]+self.X[0][0])/2, (coorend[1]+self.X[1][0])/2, 10, i]
-                way.append([coorend])
+                way.append([litters[self.typeD][i].landingPos])
                 liti.append(i)
                 if len(way) == 1:
                     self.goal = [litters[self.typeD][i].x, litters[self.typeD][i].y, litters[self.typeD][i].z, i]
@@ -217,6 +217,8 @@ class drone:
 
             # Make function for pathplanning
             self.r_array = np.array(create_trajectory(litters[self.typeD][liti[0]].path, 5, dt, gap))
+            self.r_array = np.vstack([self.r_array, litters[self.typeD][liti[0]].landingPos])
+            # self.r_array = np.append(self.r_array, litters[self.typeD][i].landingPos, axis=1)
 
 
         self.flyingto = 0
@@ -233,8 +235,8 @@ class drone:
 
         # print("X: ", self.X, ", waypoints: ", self.waypoints)
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
-        # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.current][0], " desy: ", self.waypoints[self.current][1], " desz: ", self.waypoints[self.current][2])
-        # print(d)
+        # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.curdes][0], " desy: ", self.waypoints[self.curdes][1], " desz: ", self.waypoints[self.curdes][2])
+        print(d)
         # if self.curway + 1 < len(self.waypoints[self.curdes]) and d < 1.1:
         #     # Waypoint reached
         #     self.curway += 1
