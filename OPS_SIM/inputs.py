@@ -14,8 +14,9 @@ droneInput = dict(
     amountDrone=np.array([  5,      5]),            # n of drones per type
 
     vertv=np.array([        3,      3]),            # Max vertical v per type [m/s]
-    maxv=np.array([         10,     10]),           # Max horizontal v per type [m/s]
-    drivev=np.array([       1,      1]),            # Max drive v per type [m/s]
+    maxv=np.array([         5,     5]),           # Max horizontal v per type [m/s]
+    drivev=np.array([       1,      1]),        # Max drive v per type [m/s]
+    drivedistbetlit=np.array([  6,      6]),
 
     maxvol=np.array([       500,    0]),            # Max volume for litter storage [cm^3]
 
@@ -35,6 +36,8 @@ droneInput = dict(
     d=np.array([            0.1,    0.1]),
     k=np.array([            3e-8,   3e-8]),
     m=np.array([            1.2,    1.2]),
+    l=np.array([            0.1,    0.1]),
+    max_rpm=np.array([      1500,   1500]),
 
     S_blade=np.array([      0.01,   0.01]),
 
@@ -54,10 +57,10 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=3,         #runspeed compared to real-time
-    maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    runspeed=30000,         #runspeed compared to real-time
+    maxplotloops=1000,       #when runspeed is set up to be faster than possible, it will plot every ... loops
     dt=0.1,                   #time step taken at every loop instance
-    plotOperation=True,
+    plotOperation=False,
     printErrors=False,
 )
 

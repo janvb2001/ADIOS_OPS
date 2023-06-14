@@ -43,7 +43,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
         y = y_array[i]
 
         if i == 0:  # Initial point: path must start with 0 initial velocity, acceleration and jerk
-            b_list.append([[x, y, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+            b_list.append([[x, y, 5, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
             t_list.append(t)
             t += time_increment
 
@@ -53,7 +53,7 @@ def create_setpoints_from_Astar(a_star_position_array, nominal_speed, block_size
             continue
 
         elif i == len(a_star_position_array) - 1:  # Final point: path must end with 0 final velocity, acceleration and jerk
-            b_list.append([[x, y, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+            b_list.append([[x, y, 5, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
             t_list.append(t)
             t += time_increment
 

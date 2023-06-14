@@ -132,9 +132,9 @@ def plot(li, dr, map_ax, lismall, limed, drsmall, drmed):
     #         if len(dr[i][j].r_array) > 0:
     #             x = dr[i][j].r_array[:,0]
     #             y = dr[i][j].r_array[:, 1]
-    #             z = np.zeros(len(x))
+    #             z = dr[i][j].r_array[:, 2]
     #             map_ax.plot3D(x,y,z, color="g", marker=".")
-    #             print("test")
+    #             # print("test")
 
     updateplot(lismall, litCoor, 0, amAvail[0])
     updateplot(limed, litCoor, 1, amAvail[1])
