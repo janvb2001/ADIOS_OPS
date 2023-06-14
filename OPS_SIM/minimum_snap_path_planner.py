@@ -5,14 +5,14 @@ from directions import Directions
 ### Use the function create_trajectory(a_star_position_arrray, nominal_speed, dt) ###
 
 def get_A(t0, t1):
-    return np.array([[t0 ** 7, t0 ** 6, t0 ** 5, t0 ** 4, t0 ** 3, t0 ** 2, t0, 1],  # x at t1
-                     [7 * t0 ** 6, 6 * t0 ** 5, 5 * t0 ** 4, 4 * t0 ** 3, 3 * t0 ** 2, 2 * t0, 1, 0],  # v at t1
-                     [42 * t0 ** 5, 30 * t0 ** 4, 20 * t0 ** 3, 12 * t0 ** 2, 6 * t0, 2, 0, 0],  # a at t1
-                     [210 * t0 ** 4, 120 * t0 ** 3, 60 * t0 ** 2, 24 * t0, 6, 0, 0, 0],  # jerk at t1
-                     [t1 ** 7, t1 ** 6, t1 ** 5, t1 ** 4, t1 ** 3, t1 ** 2, t1, 1],  # x at t1
-                     [7 * t1 ** 6, 6 * t1 ** 5, 5 * t1 ** 4, 4 * t1 ** 3, 3 * t1 ** 2, 2 * t1, 1, 0],  # v at t1
-                     [42 * t1 ** 5, 30 * t1 ** 4, 20 * t1 ** 3, 12 * t1 ** 2, 6 * t1, 2, 0, 0],  # a at t1
-                     [210 * t1 ** 4, 120 * t1 ** 3, 60 * t1 ** 2, 24 * t1, 6, 0, 0, 0]])  # jerk at t1
+    return np.array([[t0 ** 7      , t0 ** 6      , t0 ** 5     , t0 ** 4     , t0 ** 3    , t0 ** 2, t0, 1],  # x at t1
+                     [7 * t0 ** 6  , 6 * t0 ** 5  , 5 * t0 ** 4 , 4 * t0 ** 3 , 3 * t0 ** 2, 2 * t0 , 1 , 0],  # v at t1
+                     [42 * t0 ** 5 , 30 * t0 ** 4 , 20 * t0 ** 3, 12 * t0 ** 2, 6 * t0     , 2      , 0 , 0],  # a at t1
+                     [210 * t0 ** 4, 120 * t0 ** 3, 60 * t0 ** 2, 24 * t0     , 6          , 0      , 0 , 0],  # jerk at t1
+                     [t1 ** 7      , t1 ** 6      , t1 ** 5     , t1 ** 4     , t1 ** 3    , t1 ** 2, t1, 1],  # x at t1
+                     [7 * t1 ** 6  , 6 * t1 ** 5  , 5 * t1 ** 4 , 4 * t1 ** 3 , 3 * t1 ** 2, 2 * t1 , 1 , 0],  # v at t1
+                     [42 * t1 ** 5 , 30 * t1 ** 4 , 20 * t1 ** 3, 12 * t1 ** 2, 6 * t1     , 2      , 0 , 0],  # a at t1
+                     [210 * t1 ** 4, 120 * t1 ** 3, 60 * t1 ** 2, 24 * t1     , 6          , 0      , 0 , 0]])  # jerk at t1
 
 
 def get_polynomial_from_coeffs(p_array):
@@ -265,14 +265,17 @@ def get_yaw_angle_from_velocity(x_speed, y_speed):
 # Takes the desired states at 2 end point as input, gives a trajectory as a polynomial function of time as output
 def create_spline(b, t0, t1, dt):
     # x(t) = p7 * t^7 + p6 * t^6 + p5 * t^5 + p4 t^4 + p3 * t^3 + p2 * t^2 + p1 * t + p0
+    delta_t = t1 - t0
 
-    A = get_A(t0, t1)
+    A = get_A(0, delta_t)
     p_array = np.linalg.inv(A) * b
 
     r_t = get_polynomial_from_coeffs(p_array)
 
-    t_array = np.arange(t0, t1, dt)
+    t_array = np.arange(0, delta_t, dt)
     r_array = r_t(t_array)
+
+    t_array += t0
 
     return r_array
 
@@ -294,59 +297,180 @@ def create_trajectory(a_star_position_array, nominal_speed, dt, block_size):
 
 if __name__=="__main__":
 
-    # b_array = np.array([[[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], # [point, r/v/a/jerk, x/y/z/yaw]
-    #                     [[2, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-    #                     [[1, 2, 2, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-    #                     [[3, 0, 0, 0], [4, 2, 3, 0], [0, 0, 0, 0], [0, 0 ,0, 0]]])
+    # b_array = np.matrix([[80.5, 30.5], [7.07106781, 7.07106781], [0, 0], [0, 0], [81, 32], [0, 10], [0, 0], [0, 0]])
+    #
+    # t_start = 100
+    # r_array = create_spline(b_array, t_start, t_start + 0.05, 0.01)
+    # print(r_array[0], r_array[-1])
+    #
+    # plt.plot(r_array[:, 0], r_array[:, 1])
+    # plt.plot()
+    # plt.show()
 
-    a_star_position_array = np.array([[3.5, 0.5],
-                                      [2.5, 0.5],
-                                      [1.5, 0.5],
-                                      [0.5, 0.5],
-                                      [0.5, 1.5],
-                                      [0.5, 2.5],
-                                      [1.5, 3.5],
-                                      [2.5, 4.5],
-                                      [3.5, 5.5],
-                                      [4.5, 5.5]])
+    a_star_position_array = np.array([[5, 5],
+                                      [6, 5],
+                                      [7, 5],
+                                      [8, 5],
+                                      [9, 5],
+                                      [10, 5],
+                                      [11, 5],
+                                      [12, 5],
+                                      [13, 5],
+                                      [14, 5],
+                                      [15, 5],
+                                      [16, 5],
+                                      [17, 5],
+                                      [18, 5],
+                                      [19, 5],
+                                      [20, 5],
+                                      [21, 5],
+                                      [22, 5],
+                                      [23, 5],
+                                      [24, 5],
+                                      [25, 5],
+                                      [26, 5],
+                                      [27, 5],
+                                      [28, 5],
+                                      [29, 5],
+                                      [30, 5],
+                                      [31, 5],
+                                      [32, 5],
+                                      [33, 5],
+                                      [34, 5],
+                                      [35, 5],
+                                      [36, 5],
+                                      [37, 5],
+                                      [38, 5],
+                                      [39, 5],
+                                      [40, 5],
+                                      [41, 5],
+                                      [42, 5],
+                                      [43, 5],
+                                      [44, 5],
+                                      [45, 5],
+                                      [46, 5],
+                                      [47, 5],
+                                      [48, 5],
+                                      [49, 5],
+                                      [50, 5],
+                                      [51, 5],
+                                      [52, 5],
+                                      [53, 5],
+                                      [54, 5],
+                                      [55, 5],
+                                      [56, 6],
+                                      [57, 7],
+                                      [58, 8],
+                                      [59, 9],
+                                      [60, 10],
+                                      [61, 11],
+                                      [62, 12],
+                                      [63, 13],
+                                      [64, 14],
+                                      [65, 15],
+                                      [66, 16],
+                                      [67, 17],
+                                      [68, 18],
+                                      [69, 19],
+                                      [70, 20],
+                                      [71, 21],
+                                      [72, 22],
+                                      [73, 23],
+                                      [74, 24],
+                                      [75, 25],
+                                      [76, 26],
+                                      [77, 27],
+                                      [78, 28],
+                                      [79, 29],
+                                      [80, 30],
+                                      [81, 31],
+                                      [81, 32],
+                                      [81, 33],
+                                      [81, 34],
+                                      [81, 35],
+                                      [81, 36],
+                                      [81, 37],
+                                      [82, 38],
+                                      [83, 39],
+                                      [84, 40],
+                                      [85, 41],
+                                      [86, 42],
+                                      [87, 43],
+                                      [88, 44],
+                                      [88, 44]])
+
 
     b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 10, 1)
-
-    x_points = b_array[:,0,0]
+    x_points = b_array[:, 0, 0]
     y_points = b_array[:,0,1]
 
+    print(b_array[:,:,:2])
 
-    vx = b_array[:,1,0]
-    vy = b_array[:,1,1]
+    print(t_array)
 
-    ax = b_array[:,2,0]
-    ay = b_array[:,2,1]
-
-    for i in range(len(t_array)):
-        print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
-
-    ### PLOT GRIDLINES ###
-
-    for i in range(7):
-        plt.plot([0, 5], [i, i], color='black')
-
-    for i in range(6):
-        plt.plot([i, i], [0, 6], color='black')
-
-    for i in range(90):
-        plt.plot([i / 100 + 4.05, i / 100 + 4.05], [1 + 0.1, 2 - 0.1], color='red')
-        plt.plot([i / 100 + 3.05, i / 100 + 3.05], [1 + 0.1, 2 - 0.1], color='red')
-        plt.plot([i / 100 + 2.05, i / 100 + 2.05], [1 + 0.1, 2 - 0.1], color='red')
-        plt.plot([i / 100 + 1.05, i / 100 + 1.05], [1 + 0.1, 2 - 0.1], color='red')
-        plt.plot([i / 100 + 1.05, i / 100 + 1.05], [2 + 0.1, 3 - 0.1], color='red')
-
-        plt.plot([3.5, 4.5], [0.5, 5.5], 'o', markersize='20', color='black')
-    ######################
-
-    #plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'x', color='b', markersize='10')
+    plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'x', color='b', markersize='10')
     plt.plot(x_points, y_points, 'o', color='red')
 
     r_array = create_trajectory(a_star_position_array, 1, 0.01, 1)
 
     plt.plot(r_array[:,0], r_array[:,1], color='green', markersize='5')
     plt.show()
+
+
+
+    # b_array = np.array([[[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], # [point, r/v/a/jerk, x/y/z/yaw]
+    #                     [[2, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    #                     [[1, 2, 2, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    #                     [[3, 0, 0, 0], [4, 2, 3, 0], [0, 0, 0, 0], [0, 0 ,0, 0]]])
+
+    # a_star_position_array = np.array([[3.5, 0.5],
+    #                                   [2.5, 0.5],
+    #                                   [1.5, 0.5],
+    #                                   [0.5, 0.5],
+    #                                   [0.5, 1.5],
+    #                                   [0.5, 2.5],
+    #                                   [1.5, 3.5],
+    #                                   [2.5, 4.5],
+    #                                   [3.5, 5.5],
+    #                                   [4.5, 5.5]])
+    #
+    # b_array, t_array = create_setpoints_from_Astar(a_star_position_array, 10, 1)
+    #
+    # x_points = b_array[:,0,0]
+    # y_points = b_array[:,0,1]
+    #
+    #
+    # vx = b_array[:,1,0]
+    # vy = b_array[:,1,1]
+    #
+    # ax = b_array[:,2,0]
+    # ay = b_array[:,2,1]
+    #
+    # for i in range(len(t_array)):
+    #     print('x:', x_points[i], 'vx:', vx[i], 'vy:', vy[i], 'ax:', ax[i], 'ay:', ay[i], 't:', t_array[i])
+    #
+    # ### PLOT GRIDLINES ###
+    #
+    # for i in range(7):
+    #     plt.plot([0, 5], [i, i], color='black')
+    #
+    # for i in range(6):
+    #     plt.plot([i, i], [0, 6], color='black')
+    #
+    # for i in range(90):
+    #     plt.plot([i / 100 + 4.05, i / 100 + 4.05], [1 + 0.1, 2 - 0.1], color='red')
+    #     plt.plot([i / 100 + 3.05, i / 100 + 3.05], [1 + 0.1, 2 - 0.1], color='red')
+    #     plt.plot([i / 100 + 2.05, i / 100 + 2.05], [1 + 0.1, 2 - 0.1], color='red')
+    #     plt.plot([i / 100 + 1.05, i / 100 + 1.05], [1 + 0.1, 2 - 0.1], color='red')
+    #     plt.plot([i / 100 + 1.05, i / 100 + 1.05], [2 + 0.1, 3 - 0.1], color='red')
+    #
+    #     plt.plot([3.5, 4.5], [0.5, 5.5], 'o', markersize='20', color='black')
+    # ######################
+    #
+    # #plt.plot(a_star_position_array[:, 0], a_star_position_array[:, 1], 'x', color='b', markersize='10')
+    # plt.plot(x_points, y_points, 'o', color='red')
+    #
+    # r_array = create_trajectory(a_star_position_array, 1, 0.01, 1)
+    #
+    # plt.plot(r_array[:,0], r_array[:,1], color='green', markersize='5')
+    # plt.show()
