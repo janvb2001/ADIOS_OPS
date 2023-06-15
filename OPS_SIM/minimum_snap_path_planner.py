@@ -4,7 +4,7 @@ from directions import Directions
 
 ### Use the function create_trajectory(a_star_position_arrray, nominal_speed, dt) ###
 
-def get_A(t0, t1):
+def get_vandermonde(t0, t1):
     return np.array([[t0 ** 7      , t0 ** 6      , t0 ** 5     , t0 ** 4     , t0 ** 3    , t0 ** 2, t0, 1],  # x at t1
                      [7 * t0 ** 6  , 6 * t0 ** 5  , 5 * t0 ** 4 , 4 * t0 ** 3 , 3 * t0 ** 2, 2 * t0 , 1 , 0],  # v at t1
                      [42 * t0 ** 5 , 30 * t0 ** 4 , 20 * t0 ** 3, 12 * t0 ** 2, 6 * t0     , 2      , 0 , 0],  # a at t1
@@ -267,7 +267,7 @@ def create_spline(b, t0, t1, dt):
     # x(t) = p7 * t^7 + p6 * t^6 + p5 * t^5 + p4 t^4 + p3 * t^3 + p2 * t^2 + p1 * t + p0
     delta_t = t1 - t0
 
-    A = get_A(0, delta_t)
+    A = get_vandermonde(0, delta_t)
     p_array = np.linalg.inv(A) * b
 
     r_t = get_polynomial_from_coeffs(p_array)
