@@ -7,3 +7,5 @@ class litter:
         self.vol = vol
         self.avail = True
         self.picked = False
+
+        self.pickdata = dict()

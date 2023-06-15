@@ -4,6 +4,7 @@ import OPS_Simulation.control_and_stability.quadcopter_full_state_space as ss
 import OPS_Simulation.control_and_stability.LQR_controller as LQR_controller
 import OPS_Simulation.control_and_stability.LQR_controller_hexa as LQR_controller_hexa
 import scipy.io as io
+import time
 
 from math import pi
 from generalFunc import *
@@ -73,10 +74,14 @@ class drone:
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
 
+        # Debugging vars
         self.lastd = None
         self.flyingv = 0
+        self.litteramountpicked = 0
+        self.comingfrom = 0
+        self.timedist = dict()
 
-        self.w_array = np.matrix([[1], [2], [3], [4]])
+        self.w_array = np.matrix([[1], [2], [3], [4], [5], [6]])
 
     def moveToWaypoint(self, curd, dmax, curdes, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -106,6 +111,7 @@ class drone:
 
         self.w_array = self.lqr_controller.get_motor_rotation_speeds(self.X, self.desiredX, 9.80665, self, self.K)
 
+
         self.U = ss.get_U_hexa_config(self.w_array, 9.80665, self)
         # X_dot = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.Y = np.dot(self.C, self.X) + np.dot(self.D, self.U)
@@ -125,7 +131,7 @@ class drone:
         else:
             self.waittogo = 0
             self.Pwait = 0
-    def driveToLitter(self, dt):
+    def driveToLitter(self, dt, t):
         # Function is called each timestep to move the drone to the litter by driving. When goal is reached, state is
         # changed to 3 to pickup litter
         maxd = self.drivevmax * dt
@@ -136,15 +142,26 @@ class drone:
         way = self.moveToWaypoint(0, maxd, self.curdes, self.curway)
         if way == -1:
             #Litter is reached
+            self.timedist["litterReached"] = t
+
             self.state = 3
 
-    def pickLitter(self, litters, gs):
+    def pickLitter(self, litters, gs, t, droneN):
         # Litter is picked up (time delay on the drone). The picked litter variable is changed to picked and the volume
         # of the litter is added to payload volume in the drone. Then the state is changed according to the planning.
         # When more litter is closeby, the drone drives there (2), otherwise the drone flies there (1). When cargo is
         # full, the drone flies back to ground station (1)
         litters[self.typeD][self.goal[3]].picked = True
         self.volume += litters[self.typeD][self.goal[3]].vol
+        self.litteramountpicked += 1
+
+        litters[self.typeD][self.goal[3]].comefrom = self.comingfrom
+        litters[self.typeD][self.goal[3]].timedist = self.timedist
+        litters[self.typeD][self.goal[3]].pickdata["droneID"] = [self.typeD, droneN]
+        litters[self.typeD][self.goal[3]].pickdata["drone-amount"] = self.litteramountpicked
+        litters[self.typeD][self.goal[3]].pickdata["comingfrom"] = self.comingfrom
+        litters[self.typeD][self.goal[3]].pickdata["timetopick"] = t-self.tb
+
 
         P = self.powerobdetec + self.powerflightcom + self.powergrabber
         self.Pwait = P
@@ -191,7 +208,7 @@ class drone:
 
         self.waittogo = self.litdropt
         self.volume = 0
-        if self.batLife > 5000:
+        if self.batLife > 5000 or True:
             self.state = 0
         else:
             # Battery must be replaced
@@ -215,9 +232,12 @@ class drone:
         li = litters[self.typeD]
         way = []
         liti = []
+        self.timedist = dict()
+        self.timedist["litterChoose"] = t
 
         i = 0
         if self.volume == 0:
+            self.comingfrom = "gs"
             while len(way) == 0:
                 if litters[self.typeD][i].avail:
                     litters[self.typeD][i].avail = False
@@ -256,6 +276,7 @@ class drone:
                     self.r_array_back = self.r_array
 
         else:
+            self.comingfrom = "li"
             di = np.zeros(len(li))
             for i in range(len(li)):
                 if li[i].avail:
@@ -298,6 +319,7 @@ class drone:
                 if disorted[i] < droneIn["drivedistbetlit"][self.typeD]:
                     # Drive
                     self.state = 2
+                    self.tb = t
                     way = [[[li[mini].x, li[mini].y, 0, mini]]]
 
                 else:
@@ -330,6 +352,7 @@ class drone:
                 self.state = 1
                 self.curdes = 0
                 self.curway = 0
+                self.tb = t
 
 
         self.waypoints = way
@@ -413,6 +436,8 @@ class drone:
         if d < 0.1:
             if self.flyingto == 0:
             # Drone has landed and now drives to litter
+                self.timedist["landed"] = t
+
                 self.X[2] = 0.
                 self.state = 2
                 # self.waypoints = [[self.goal]]
@@ -433,17 +458,6 @@ class drone:
                     self.flyingindex += 1
 
 
-
-
-
-
-
-
-
-
-
-
-
         # Calculating the drone power and updating battery
         # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
 
@@ -459,7 +473,7 @@ class drone:
         self.batLife += delta_E
         # print(self.batLife)
 
-    def updateDrone(self, dt, t, litters, gap, gs, simPar, grid, drivingd, droneIn):
+    def updateDrone(self, dt, t, litters, gap, gs, simPar, grid, drivingd, droneIn, droneN):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
@@ -502,9 +516,9 @@ class drone:
                 case 1:  # When the drone is on its way, move to the checkpoints and land near the litter
                     self.flying(gs, dt, t)
                 case 2:  # When the drone has landed, it drives to the litter
-                    self.driveToLitter(dt)
+                    self.driveToLitter(dt, t)
                 case 3:  # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
-                    self.pickLitter(litters, gs)
+                    self.pickLitter(litters, gs, t, droneN)
                 case 4:  # When the drone has reached the ground station, it drops the litter and checks battery life
                     self.dropLitter()
                 case 5:  # When the drone is at the ground station and needs to charge. After, litter is chosen

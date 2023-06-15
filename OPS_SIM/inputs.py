@@ -2,7 +2,7 @@ import numpy as np
 
 litterInput = dict(
     amount=10,
-    littern=np.array([  100,    100]),
+    littern=np.array([  500,    500]),
     minvol=np.array([   0,      50]),
     maxvol=np.array([   50,     500]),
     drivingdist=np.array([3.,    3.]),
@@ -57,10 +57,10 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=30000,         #runspeed compared to real-time
-    maxplotloops=1000,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=0.1,                   #time step taken at every loop instance
-    plotOperation=False,
+    runspeed=3,         #runspeed compared to real-time
+    maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    dt=0.02,                   #time step taken at every loop instance
+    plotOperation=True,
     printErrors=False,
 )
 

@@ -17,16 +17,16 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
         while t < simPar["runspeed"] * (time.time() - tstart) and countloops < simPar["maxplotloops"]:
 
             for drtype in range(len(drones)):
-                # dcount = 0
+                dcount = 0
                 for d in drones[drtype]:
-                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar, grid, litterin["drivingdist"][drtype], dronein)
+                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar, grid, litterin["drivingdist"][drtype], dronein, dcount)
 
                     if abs(d.flyingv) > maxvreached:
                         maxvreached = abs(d.flyingv)
                         # print(maxvreached)
 
                     # print("drtype: ", drtype, "dcount: ", dcount, ", t: ", t, ", x: ", d.x, ', y: ', d.y, ", z: ", d.z)
-                    # dcount += 1
+                    dcount += 1
 
             t += dt
             # print(t)
@@ -42,7 +42,7 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
                         amount[i] += 1
 
         totalLitter = sum(amount)
-        print(totalLitter)
+        # print(totalLitter)
         if totalLitter == 0:
             totDoneDrones = 0
             for i in range(len(drones)):
@@ -60,5 +60,7 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
     if simPar["plotOperation"]:
         # Make sure the plot remains on screen when program is finished
         plt.show(block=True)
+
+    return litters, t
 
 
