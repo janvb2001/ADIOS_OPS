@@ -290,8 +290,8 @@ def main(grid, start, ends, gap, length, width, rowsx, rowsy, litters, animation
 # obst = []
 # for i in range(0):
 # 	obst.append((random.randint(0,WIDTH),random.randint(0,LENGTH)))
-
-
+#
+#
 # grid, rowsx, rowsy = make_grid(LENGTH, WIDTH, gap)
 #
 #
@@ -337,7 +337,7 @@ def main(grid, start, ends, gap, length, width, rowsx, rowsy, litters, animation
 #
 # t = time.time()
 #
-# main(grid, start, ends, gap, LENGTH, WIDTH, rowsx, rowsy, litters, animation)
+# main(grid, start, ends, gap, LENGTH, WIDTH, rowsx, rowsy, litters, animation, 1)
 #
 # print(time.time() - t)
 #

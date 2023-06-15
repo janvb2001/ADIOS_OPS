@@ -32,10 +32,17 @@ def indicesSquareCorners(square, gap, length, width, grid):
 
 def checkLineOnGrid(grid, start, end, res):
     # Return whether line crosses grid barrier
-    x1 = start[0]
-    x2 = end[0]
-    y1 = start[1]
-    y2 = end[1]
+    if start[0] < end[0]:
+        x1 = start[0]
+        x2 = end[0]
+        y1 = start[1]
+        y2 = end[1]
+    else:
+        x1 = end[0]
+        x2 = start[0]
+        y1 = end[1]
+        y2 = start[1]
+
 
     if x1 == x2:
         # Vertical line
@@ -64,7 +71,7 @@ def checkLineOnGrid(grid, start, end, res):
             if cols[i] >= len(grid[rows[i]]):
                 cols[i] -= 1
 
-            if grid[rows[i]][cols[i]].color == (0, 0, 0):
+            if grid[cols[i]][rows[i]].color == (0, 0, 0):
                 barCrossed = True
                 break
 

@@ -19,7 +19,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
                       droneIn["powergrabbing"][i], droneIn["powerDriving"][i], droneIn["powerObjDetec"][i],
                       droneIn["maxBat"][i], droneIn["litPickT"][i],
                       droneIn["litDropT"][i], droneIn["recharget"][i], droneIn["b"][i], droneIn["d"][i],
-                      droneIn["k"][i], droneIn["m"][i], droneIn["S_blade"][i],
+                      droneIn["k"][i], droneIn["m"][i], droneIn["l"][i], droneIn["max_rpm"][i], droneIn["S_blade"][i],
                       droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"], droneIn["batThreshhold"][i])
 
             drones[i].append(d)
@@ -86,13 +86,11 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
     notfound = 0
     for i in range(len(litters)):
         for j in range(len(litters[i])):
-            if i == 1 and j == 35:
-                print("stop")
-
 
             li = litters[i][j]
             if len(li.path) == 1:
                 notfound += 1
+                print("litter not found, type: ", i, ", drone: ", j)
 
             d = dist2d(li.x, li.path[-1][0], li.y, li.path[-1][1])
             if d > litterIn["drivingdist"][i]:
