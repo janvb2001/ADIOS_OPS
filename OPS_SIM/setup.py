@@ -20,7 +20,7 @@ def setupClasses(litterIn, droneIn, gsIn, areaIn, simpar, pathplanningPar):
                       droneIn["maxBat"][i], droneIn["litPickT"][i],
                       droneIn["litDropT"][i], droneIn["recharget"][i], droneIn["b"][i], droneIn["d"][i],
                       droneIn["k"][i], droneIn["m"][i], droneIn["l"][i], droneIn["max_rpm"][i], droneIn["S_blade"][i],
-                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i], 9.80665, simpar["dt"], droneIn["batThreshhold"][i])
+                      droneIn["Ixx"][i], droneIn["Iyy"][i], droneIn["Izz"][i],droneIn["Sx"][i],droneIn["Sy"][i],droneIn["Sz"][i],droneIn["Cdx"][i],droneIn["Cdy"][i],droneIn["Cdz"][i], 9.80665, simpar["dt"], droneIn["batThreshhold"][i])
 
             drones[i].append(d)
 

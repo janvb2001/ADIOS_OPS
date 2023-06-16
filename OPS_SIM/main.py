@@ -25,10 +25,11 @@ else:
 
 # simulate
 litters1, tdone = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput)
+print("stop")
 
-simPar["dt"] = 0.01
-# setup the ararys to keep track of the litters and drones
-drones, litters, grid = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar, pathplanningPar)
+# simPar["dt"] = 0.01
+# # setup the ararys to keep track of the litters and drones
+# drones, litters, grid = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar, pathplanningPar)
 #
 # litters2, tdone = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput)
 #

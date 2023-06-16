@@ -7,6 +7,7 @@ from plotting import *
 
 def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, lip1, drp0, drp1, litterin, dronein):
     maxvreached = 0
+    message = [False, False]
 
     t = 0.
     dt = simPar["dt"]
@@ -41,8 +42,14 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
                     if not litters[i][l].picked:
                         amount[i] += 1
 
+
+        for i in range(len(amount)):
+            if not message[i] and amount[i] == 0:
+                print("Drone type ", i, "is done at ", t, " seconds")
+                message[i] = True
+
         totalLitter = sum(amount)
-        # print(totalLitter)
+        print(totalLitter)
         if totalLitter == 0:
             totDoneDrones = 0
             for i in range(len(drones)):
@@ -54,7 +61,7 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
                 print("all litter is cleaned")
 
     print("Time to run simulation: ", time.time() - tstart, " seconds")
-    print("All litter is cleaned after: ", int(t / 60), " minutes")
+    print("All litter is cleaned after ", int(t / 60), " minutes and ", round(t - 60*int(t/60)), "seconds")
     print("Max v reached by drones is: ", round(maxvreached, 2), " m/s")
 
     if simPar["plotOperation"]:

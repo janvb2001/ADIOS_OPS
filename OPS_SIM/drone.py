@@ -3,6 +3,7 @@ import numpy as np
 import OPS_Simulation.control_and_stability.quadcopter_full_state_space as ss
 import OPS_Simulation.control_and_stability.LQR_controller as LQR_controller
 import OPS_Simulation.control_and_stability.LQR_controller_hexa as LQR_controller_hexa
+import OPS_Simulation.control_and_stability.Disturbances as Disturbances
 import scipy.io as io
 import time
 
@@ -10,8 +11,9 @@ from math import pi
 from generalFunc import *
 from minimum_snap_path_planner import *
 
+
 class drone:
-    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, l, max_rpm, S_blade, Ixx, Iyy, Izz, g, dt, batThresh):
+    def __init__(self, x, y, z, typeD, verv, mv, drv, maxvol, btte, pfc, pob, pgr, pdr, bat, litpickt, litdropt, recharget, b, d, k, m, l, max_rpm, S_blade, Ixx, Iyy, Izz, Sx, Sy, Sz, CDx, CDy, CDz, g, dt, batThresh):
         self.X = np.array([[float(x)], [float(y)], [float(z)], [0], [0], [0], [0], [0], [0], [0], [0], [0]])
         self.typeD = typeD
         self.vertvmax = float(verv)
@@ -52,6 +54,12 @@ class drone:
         self.Ixx = Ixx
         self.Iyy = Iyy
         self.Izz = Izz
+        self.Sx = Sx
+        self.Sy = Sy
+        self.Sz = Sz
+        self.Cdx = CDx
+        self.Cdy = CDy
+        self.Cdz = CDz
 
         self.A = ss.get_A(g)
         self.B = ss.get_B(self.m, self.Ixx, self.Iyy, self.Izz)
@@ -80,8 +88,10 @@ class drone:
         self.litteramountpicked = 0
         self.comingfrom = 0
         self.timedist = dict()
+        self.rechargeAmount = 0
 
         self.w_array = np.matrix([[1], [2], [3], [4], [5], [6]])
+        self.disturbance = Disturbances.Disturbance_model(1.225)
 
     def moveToWaypoint(self, curd, dmax, curdes, curw):
         # Function checks whether waypoint is reached. If not reached, the next position is the distance away that the
@@ -116,6 +126,7 @@ class drone:
         # X_dot = np.dot(self.A, self.X) + np.dot(self.B, self.U)
         self.Y = np.dot(self.C, self.X) + np.dot(self.D, self.U)
         # self.X += X_dot * dt
+        # self.X += self.disturbance.get_frame_drag(self.X, self)
         self.X = self.E * (self.X + self.B*self.K*dt*self.desiredX)
 
     def delaying(self, dt):
@@ -208,12 +219,14 @@ class drone:
 
         self.waittogo = self.litdropt
         self.volume = 0
-        if self.batLife > 5000 or True:
+        if self.batLife > self.batThresh:
             self.state = 0
         else:
             # Battery must be replaced
             self.waittogo = self.recharget
             self.state = 5
+            self.rechargeAmount += 1
+            print("drone recharged for the ", self.rechargeAmount, " time")
     def recharged(self):
         # The drone has reached the ground station and is recharging. A time delay is posed and the battery capacity is
         # restored to max. Afterwards, new litter is chosen (0)
@@ -341,6 +354,10 @@ class drone:
                     self.r_array = np.array(create_trajectory(newpath, droneIn["maxv"][self.typeD], dt, gap))
                     self.r_array = np.vstack([self.r_array, [x_land, y_land, 0, 0]])
 
+
+                    if len(litters[self.typeD][mini].path) == 1:
+                        litters[self.typeD][mini].path = np.vstack([litters[self.typeD][mini].path, [gs["x"], gs["y"]]])
+
                     self.r_array_back = np.array(create_trajectory(litters[self.typeD][mini].path, droneIn["maxv"][self.typeD], dt, gap))
                     self.r_array_back = np.vstack([[gs["x"], gs["y"], 0, 0], self.r_array_back])
             else:
@@ -403,6 +420,7 @@ class drone:
         if self.lastd == None:
             self.lastd = d
         self.flyingv = (d-self.lastd)/dt
+        print(self.flyingv)
 
         self.lastd = d
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.curdes][0], " desy: ", self.waypoints[self.curdes][1], " desz: ", self.waypoints[self.curdes][2])
@@ -462,13 +480,19 @@ class drone:
         # https://www.tytorobotics.com/blogs/articles/how-to-increase-drone-flight-time-and-lift-capacity - propeller efficiency
 
         P = 0
+        T = 0
 
         for w in self.w_array[:,0]:
             T_prop = self.b * w**2
+            T += T_prop
             P_prop = T_prop * np.sqrt(T_prop) / np.sqrt(2 * 1.225 * self.S_blade) / self.battothrusteff
-            P += P_prop
+            P += P_prop / 1.29 / 1.07
+
+        # print("Thrust: ", T, "weight: ", self.m * 9.81, " power: ", P)
+
 
         P += self.powerflightcom + self.powerobdetec
+
         delta_E = max(-P*dt, -50)
         self.batLife += delta_E
         # print(self.batLife)
