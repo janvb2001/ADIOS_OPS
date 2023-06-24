@@ -1,7 +1,7 @@
 import numpy as np
 
 litterInput = dict(
-    amount=10,
+    amount=1000,
     littern=np.array([  640,    360]),
     minvol=np.array([   0,      16]),
     maxvol=np.array([   16,     500]),
@@ -11,7 +11,7 @@ litterInput = dict(
 
 droneInput = dict(
     dronetotal=10,                                          # total amount of drones
-    amountDrone=np.array([  3,      7]),            # n of drones per type
+    amountDrone=np.array([  2,      4]),            # n of drones per type
 
     vertv=np.array([        3,      3]),            # Max vertical v per type [m/s]
     maxv=np.array([         5,     5]),           # Max horizontal v per type [m/s]
@@ -20,13 +20,14 @@ droneInput = dict(
 
     maxvol=np.array([       500,    0]),            # Max volume for litter storage [cm^3]
 
-    batThreshhold=np.array([300000,   300000]),
+    batThreshhold=np.array([150000,   150000]),
     battothrusteff=np.array([       0.7,    0.7]),
     powerFlightcom=np.array([       10,    10]),          # Power usage of the drone [W]
     powergrabbing=np.array([        20,    5]),          # Power usage of the drone [W]
     powerDriving=np.array([        30,    30]),
     powerObjDetec=np.array([        20,    20]),          # Power usage of the drone [W]
-    maxBat=np.array([       1278720,   1278720]),         # Battery storage [J] 16000 mAh, 22.2 V
+    maxBat=np.array([       0.9 * 1278720,  0.9 * 1278720]),         # Battery storage [J] 16000 mAh, 22.2 V
+
 
     litPickT=np.array([     2,     2]),           # How long it takes to pick litter when on top [s]
     litDropT=np.array([     20,     2]),           # How long it takes to drop litter when at gs [s]
@@ -41,9 +42,9 @@ droneInput = dict(
 
     S_blade=np.array([      0.0506707,   0.0506707]),       # With diameter of 10 inches
 
-    Ixx=np.array([          0.00433,    0.00433]),
-    Iyy=np.array([          0.00433,    0.00433]),
-    Izz=np.array([          0.008,      0.008]),
+    Ixx=np.array([          0.051928,    0.051928]),
+    Iyy=np.array([          0.058845,    0.058845]),
+    Izz=np.array([          0.10289,      0.10289]),
     Sx=np.array([           0.0225,     0.0225]),
     Sy=np.array([           0.0206,     0.0206]),
     Sz=np.array([           0.02015,     0.02015]),
@@ -64,10 +65,10 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=1,         #runspeed compared to real-time
-    maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
-    dt=0.02,                   #time step taken at every loop instance
-    plotOperation=True,
+    runspeed=10000,         #runspeed compared to real-time
+    maxplotloops=10000,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    dt=0.01,                   #time step taken at every loop instance
+    plotOperation=False,
     printErrors=False,
 )
 

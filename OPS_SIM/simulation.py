@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 from plotting import *
 
 
-def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, lip1, drp0, drp1, litterin, dronein):
+def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, lip1, drp0, drp1, litterin, dronein, batlifef=1.5, tracking = False, storeData=False):
     maxvreached = 0
     message = [False, False]
+    havebreaked = [False, False]
+    ts = [0, 0]
 
     t = 0.
     dt = simPar["dt"]
@@ -16,18 +18,29 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
     while run:
         countloops = 0
         while t < simPar["runspeed"] * (time.time() - tstart) and countloops < simPar["maxplotloops"]:
-
+            breaking = False
+            dronesdone = 0
             for drtype in range(len(drones)):
                 dcount = 0
+                dronetypedone = 0
                 for d in drones[drtype]:
-                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar, grid, litterin["drivingdist"][drtype], dronein, dcount)
+                    d.updateDrone(dt, t, litters, pathpp["gridresolution"], groundstat, simPar, grid, litterin["drivingdist"][drtype], dronein, dcount, batlifef, tracking)
 
                     if abs(d.flyingv) > maxvreached:
                         maxvreached = abs(d.flyingv)
                         # print(maxvreached)
+                    if d.state == 6:
+                        dronesdone += 1
+                        dronetypedone += 1
+                if dronetypedone == dronein["amountDrone"][drtype] and not havebreaked[drtype]:
+                    breaking = True
+                    havebreaked[drtype] = True
 
                     # print("drtype: ", drtype, "dcount: ", dcount, ", t: ", t, ", x: ", d.x, ', y: ', d.y, ", z: ", d.z)
                     dcount += 1
+            if dronesdone == sum(dronein["amountDrone"]) or breaking:
+                break
+
 
             t += dt
             # print(t)
@@ -47,6 +60,7 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
             if not message[i] and amount[i] == 0:
                 print("Drone type ", i, "is done at ", t, " seconds")
                 message[i] = True
+                ts[i] = t
 
         totalLitter = sum(amount)
         print(totalLitter)
@@ -61,13 +75,13 @@ def simulate(drones, litters, grid, groundstat, simPar, pathpp, map_ax, lip0, li
                 print("all litter is cleaned")
 
     print("Time to run simulation: ", time.time() - tstart, " seconds")
-    print("All litter is cleaned after ", int(t / 60), " minutes and ", round(t - 60*int(t/60)), "seconds")
-    print("Max v reached by drones is: ", round(maxvreached, 2), " m/s")
+    print("All litter is cleaned after ", int(t / 60), " minutes and ", round(t - 60*int(t/60)), "seconds, total: ", t, " seconds")
+    # print("Max v reached by drones is: ", round(maxvreached, 2), " m/s")
 
     if simPar["plotOperation"]:
         # Make sure the plot remains on screen when program is finished
         plt.show(block=True)
 
-    return litters, t
+    return litters, drones, t, ts
 
 

@@ -215,14 +215,14 @@ def draw_grid(win, rowsx, rowsy, gap, length, width, f):
 			pygame.draw.line(win, (128, 128, 128), (f * j * gap, 0), (f * j * gap, f * length))
 
 
-def draw(win, grid, rowsx, rowsy, gap, length, width, f):
+def draw(win, grid, rowsy, rowsx, gap, length, width, f):
 	win.fill((255, 255, 255))
 
 	for row in grid:
 		for spot in row:
 			spot.draw(win, f)
 
-	draw_grid(win, rowsx, rowsy, gap, length, width, f)
+	draw_grid(win, rowsy, rowsx, gap, length, width, f)
 	pygame.display.update()
 
 

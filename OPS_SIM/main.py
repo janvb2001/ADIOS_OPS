@@ -10,22 +10,28 @@ from simulation import *
 
 import matplotlib.pyplot as plt
 
-
+storeData = True
 
 # setup the ararys to keep track of the litters and drones
 drones, litters, grid = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar, pathplanningPar)
 
+sli = open("small_litter.txt", 'a')
+
+bli = open("big_litter.txt", 'a')
+
 # setup the 3D plot
 if simPar["plotOperation"]:
-    map_ax, lip0, lip1, drp0, drp1 = plotSetup(litters, drones, groundStatInput, areaInput, pathplanningPar)
+    map_ax, lip0, lip1, drp0, drp1 = plotSetup(litters, drones, groundStatInput, areaInput, pathplanningPar, initPlot=True)
 else:
     map_ax = lip0 = lip1 = drp0 = drp1 = None
 
 
 
 # simulate
-litters1, tdone = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput)
-print("stop")
+
+litters1, drones, tdone, ts = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput, storeData)
+# print(np.average(drones[0][0].flyingPHistory))
+# print(np.average(drones[1][0].flyingPHistory))
 
 # simPar["dt"] = 0.01
 # # setup the ararys to keep track of the litters and drones

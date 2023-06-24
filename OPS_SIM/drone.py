@@ -81,6 +81,7 @@ class drone:
         self.flyingindex = 0
         self.flyingto = 0           # 0 = litter, 1 = groundstation
         self.f = 0
+        self.flighttime = 0
 
         # Debugging vars
         self.lastd = None
@@ -89,6 +90,11 @@ class drone:
         self.comingfrom = 0
         self.timedist = dict()
         self.rechargeAmount = 0
+
+        self.tHistory = np.array([])
+        self.batHistory = np.array([])
+        self.stateHistory = np.array([])
+        self.flyingPHistory = np.array([])
 
         self.w_array = np.matrix([[1], [2], [3], [4], [5], [6]])
         self.disturbance = Disturbances.Disturbance_model(1.225)
@@ -210,11 +216,11 @@ class drone:
         else:
             # Drone continues to next litter
             self.state = 0
-    def dropLitter(self):
+    def dropLitter(self, t):
         # When the drone has reached the ground station for dropoff. A time delay is posed on the drone and the litter
         # volume set to 0. If the drone can continue, new litter is chosen (0). Otherwise the drone will recharge (5)
 
-        P = self.powerflightcom + self.powergrabber + self.powerobdetec
+        P = self.powerflightcom + self.powergrabber + self.powerobdetec + 150
         self.Pwait = P
 
         self.waittogo = self.litdropt
@@ -223,15 +229,22 @@ class drone:
             self.state = 0
         else:
             # Battery must be replaced
+            print("flighttime was: ", self.flighttime)
+            self.flighttime = 0
+
             self.waittogo = self.recharget
             self.state = 5
             self.rechargeAmount += 1
-            print("drone recharged for the ", self.rechargeAmount, " time")
-    def recharged(self):
+            print(self.batLife)
+            print("drone recharged for the ", self.rechargeAmount, " time at ", t, " seconds" )
+
+    def recharged(self, t):
         # The drone has reached the ground station and is recharging. A time delay is posed and the battery capacity is
         # restored to max. Afterwards, new litter is chosen (0)
         self.batLife = self.batLifeMax
         self.state = 0
+        print("done with recharging at ", t, "seconds")
+
     def chooseLitter(self, litters, gap, dt, t, grid, drivingd, gs, droneIn):
         # The path planning function is called with the relevant drone information to decide which litter will be
         # picked by the drone. When this is successfull, drone will start flying (1). When no litter is available, state
@@ -267,6 +280,7 @@ class drone:
                 else:
                     if len(way) == 0:
                         self.state = 6
+                        print("When done, battery life is ", self.batLife)
                     break
             if self.state != 6:
                 # if self.typeD == 1 and liti[0] == 35:
@@ -410,17 +424,15 @@ class drone:
         # waiting
         None
 
-    def flying(self, gs, dt, t):
+    def flying(self, gs, dt, t, batlifef, tracking):
         # print("state: ", self.state,  "way: ", self.waypoints)
-
-
-
+        self.flighttime += dt
 
         d = dist3d(self.X[0], self.waypoints[self.curdes][self.curway][0],self.X[1], self.waypoints[self.curdes][self.curway][1],self.X[2], self.waypoints[self.curdes][self.curway][2])
         if self.lastd == None:
             self.lastd = d
         self.flyingv = (d-self.lastd)/dt
-        print(self.flyingv)
+        # print(self.flyingv)
 
         self.lastd = d
         # print("distance: ", d, " x: ", self.X[0], " y: ", self.X[1], " z: ", self.X[2], "desx: ", self.waypoints[self.curdes][0], " desy: ", self.waypoints[self.curdes][1], " desz: ", self.waypoints[self.curdes][2])
@@ -486,23 +498,30 @@ class drone:
             T_prop = self.b * w**2
             T += T_prop
             P_prop = T_prop * np.sqrt(T_prop) / np.sqrt(2 * 1.225 * self.S_blade) / self.battothrusteff
-            P += P_prop / 1.29 / 1.07
-
-        # print("Thrust: ", T, "weight: ", self.m * 9.81, " power: ", P)
-
+            P += P_prop * batlifef / 1.29 / 1.07
 
         P += self.powerflightcom + self.powerobdetec
 
+        if tracking:
+            self.flyingPHistory = np.append(self.flyingPHistory, P)
+
+        # print("Thrust: ", T, "weight: ", self.m * 9.81, " power: ", P)
+
         delta_E = max(-P*dt, -50)
         self.batLife += delta_E
-        # print(self.batLife)
+        # print("t: ", t, "battery life left: ", self.batLife)
 
-    def updateDrone(self, dt, t, litters, gap, gs, simPar, grid, drivingd, droneIn, droneN):
+    def updateDrone(self, dt, t, litters, gap, gs, simPar, grid, drivingd, droneIn, droneN, batlifef, tracking):
         # Function: calculate next position and change drone position
         # Input: variables to describe where the drone is, where it is going and which time step is taken
         # output: new position of drone, new state of drone when goal is reached
         if self.batLife < 0 and simPar["printErrors"]:
             print("ERROR: Battery is gone while operating, drone:", self.typeD)
+
+        if tracking:
+            self.tHistory = np.append(self.tHistory, t / 60)
+            self.batHistory = np.append(self.batHistory, self.batLife * 100/ (self.batLifeMax / 0.9))
+            self.stateHistory = np.append(self.stateHistory, self.state)
 
         # print(self.state)
         # print(self.goal)
@@ -538,14 +557,14 @@ class drone:
                 case 0:  # When drone is ready for new litter, choose which litter to pick and initiate flying
                     self.chooseLitter(litters, gap, dt, t, grid, drivingd, gs, droneIn)
                 case 1:  # When the drone is on its way, move to the checkpoints and land near the litter
-                    self.flying(gs, dt, t)
+                    self.flying(gs, dt, t, batlifef, tracking)
                 case 2:  # When the drone has landed, it drives to the litter
                     self.driveToLitter(dt, t)
                 case 3:  # The drone picks the litter when it is positioned on top of it. Then chooses to continue driving or start flying
                     self.pickLitter(litters, gs, t, droneN)
                 case 4:  # When the drone has reached the ground station, it drops the litter and checks battery life
-                    self.dropLitter()
+                    self.dropLitter(t)
                 case 5:  # When the drone is at the ground station and needs to charge. After, litter is chosen
-                    self.recharged()
+                    self.recharged(t)
                 case 6:  # Drone is waiting at gs until more litter becomes available by reconnaisance
                     self.waiting()

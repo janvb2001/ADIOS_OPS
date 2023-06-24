@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import time
 
-def plotSetup(li, dr, gr, area, pp):
+def plotSetup(li, dr, gr, area, pp, initPlot=False):
     # https://www.galaxysofts.com/new/python-creating-a-real-time-3d-plot/
 
     litCoor = np.array([np.zeros((len(li[0]),3)),np.zeros((len(li[1]),3))], dtype=object)
@@ -24,6 +24,42 @@ def plotSetup(li, dr, gr, area, pp):
     obst = pp["obstacles"]
     h = pp["obstacleHeight"]
     alphab = pp["alpha_obst"]
+
+    if initPlot:
+        fix, ax = plt.subplots()
+        line1, = ax.plot(litCoor[0][:, 0], litCoor[0][:, 1], color='lightskyblue', marker="o", markersize=2,linestyle="None")
+        line2, = ax.plot(litCoor[1][:, 0], litCoor[1][:, 1], color='lightcoral', marker="o",markersize=2, linestyle="None")
+        line3 = None
+        for ob in obst:
+            xs = [ob[0][0], ob[0][0], ob[1][0], ob[1][0]]
+            ys = [ob[0][1], ob[1][1], ob[1][1], ob[0][1]]
+            line3, = ax.fill(xs, ys, "black")
+        gsx = [50,5,5,95,98,13,70,90]
+        gsy = [50,5,95,95,5,25,10,50]
+        line4, = ax.plot(gsx, gsy, color='purple', marker="D", markersize=7, linestyle="None")
+
+        count = 1
+        for x, y in zip(gsx, gsy):
+            # label = "loc" + str(count)
+            label = str(count)
+
+            t = ax.annotate(label,  # this is the text
+                         (x, y),  # these are the coordinates to position the label
+                         textcoords="offset points",  # how to position the text
+                         xytext=(0, 10),  # distance from text to points (x,y)
+                         ha='center')  # horizontal alignment can be left, right or center
+            t.set_bbox(dict(facecolor="white", alpha=0.8, boxstyle='square,pad=0.15'))
+            count += 1
+
+        ax.set_aspect("equal")
+        ax.legend([line1, line2, line3, line4], ["Small Litter", "Large Litter", "Obstacles", "Ground station"], bbox_to_anchor=(1.04, 0.5), loc="center left")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_title("Lay-out of the ground station sensitivity test")
+
+        plt.subplots_adjust(left=0, right=0.81)
+
+        plt.show()
 
     # map = plt.figure()
     # map_ax = Axes3D(map)
