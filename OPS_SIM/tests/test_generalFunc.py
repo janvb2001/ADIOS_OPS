@@ -1,6 +1,6 @@
-import generalFunc as generalFunc
+from OLD_PROGRAM import generalFunc as generalFunc
 import unittest
-import pytest
+
 
 class test_generalFunc(unittest.TestCase):
 

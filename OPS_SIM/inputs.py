@@ -65,10 +65,10 @@ areaInput = dict(
 )
 
 simPar = dict(
-    runspeed=10000,         #runspeed compared to real-time
-    maxplotloops=10000,       #when runspeed is set up to be faster than possible, it will plot every ... loops
+    runspeed=10,         #runspeed compared to real-time
+    maxplotloops=100,       #when runspeed is set up to be faster than possible, it will plot every ... loops
     dt=0.01,                   #time step taken at every loop instance
-    plotOperation=False,
+    plotOperation=True,
     printErrors=False,
 )
 

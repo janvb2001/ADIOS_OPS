@@ -1,9 +1,6 @@
 import setup as setup
-import generalFunc
 
-import pytest
 import unittest
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import numpy as np

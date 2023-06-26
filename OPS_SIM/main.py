@@ -10,14 +10,11 @@ from simulation import *
 
 import matplotlib.pyplot as plt
 
-storeData = True
+
 
 # setup the ararys to keep track of the litters and drones
 drones, litters, grid = setupClasses(litterInput, droneInput, groundStatInput, areaInput, simPar, pathplanningPar)
 
-sli = open("small_litter.txt", 'a')
-
-bli = open("big_litter.txt", 'a')
 
 # setup the 3D plot
 if simPar["plotOperation"]:
@@ -28,8 +25,43 @@ else:
 
 
 # simulate
+storeData = False
+litters, drones, tdone, ts = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput, storeData=storeData)
 
-litters1, drones, tdone, ts = simulate(drones, litters, grid, groundStatInput, simPar, pathplanningPar, map_ax, lip0, lip1, drp0, drp1, litterInput, droneInput, storeData)
+
+
+if storeData:
+    sli = open("small_litter.txt", 'w')
+    bli = open("big_litter.txt", 'w')
+    sli.write("")
+    bli.write("")
+    sli.close()
+    bli.close()
+
+    sli = open("small_litter.txt", 'a')
+    bli = open("big_litter.txt", 'a')
+    for litype in range(len(litters)):
+        i = 0
+        for li in litters[litype]:
+            # litter type, litter id, time cleaned, x, y
+            txtline = str(litype) + ", " + str(i) + ", " + str(li.timedist["litterReached"]) + ", " + str(li.x) + ", " + str(li.y) + "\n"
+
+            if litype == 0:
+                sli.write(txtline)
+            else:
+                bli.write(txtline)
+            i += 1
+    sli.close()
+    bli.close()
+
+
+
+
+
+
+
+
+
 # print(np.average(drones[0][0].flyingPHistory))
 # print(np.average(drones[1][0].flyingPHistory))
 
