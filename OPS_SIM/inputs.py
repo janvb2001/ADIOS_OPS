@@ -73,7 +73,7 @@ simPar = dict(
 )
 
 pathplanningPar = dict(
-    gridresolution=1,
+    gridresolution=1,       # Resolution of the A* algorithm
     buildingresolution=10,
     animation=False,
     obstacles=[[(10,10),(20,20)],[(40,15),(50,40)],[(50,60),(70,70)],[(20,80),(30,85)],[(5,10),(10,60)], [(90,0),(95,30)], [(17,10),(25,80)],[(60,30),(80,60)]],
