@@ -1,0 +1,10 @@
+The ServoBebop2_yolo8.cpp file contains the code that was added to the VISP library.
+The added code combines parts from servoBebop2.cpp and tutorial-dnn-object-detection-live-new.cpp.
+
+
+Inside the installation of the VISP library on linux the custom trained yolo model in the resolution of the Bebop2 camera must be present.
+
+The classID of the desired detected object must match the classID from the model.
+See line: 'if (detection.getClassId() == 39 || detection.getClassId() == 0) {'
+
+https://visp.inria.fr/
