@@ -10,3 +10,6 @@ pathplanningPar["animation"]=True
 
 To plot the operation:
 simPar["plotOperation"]=True
+
+Repository of the control code submodule 
+https://github.com/ADIOS-DSE/OPS_Simulation.git
